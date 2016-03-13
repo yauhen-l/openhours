@@ -1,0 +1,43 @@
+/24\/7/			           { return ALWAYS }
+/Su|Mo|Tu|We|Th|Fr|Sa/ {
+												fmt.Printf("parsing weekday: %s\n", yylex.Text())
+												lval.num,_ = weekdays[yylex.Text()]
+												fmt.Printf("weekday is: %d\n", lval.num)
+												return WEEKDAY
+											 }
+/[0-9][0-9]/           {
+											  fmt.Printf("parsing NUM: %s\n", yylex.Text())
+												lval.num,_ = strconv.Atoi(yylex.Text())
+												fmt.Printf("num is: %d\n", lval.num)
+												return NUM
+											 }
+/./                    {
+											  fmt.Printf("parsing symbol: %s\n", yylex.Text())
+											  return int(yylex.Text()[0])
+											 }
+//
+package main
+import (
+			 "strconv"
+			 "bytes"
+			 "fmt"
+			 "errors"
+)
+
+var weekdays = map[string]int{"Su": 0, "Mo": 1, "Tu": 2, "We": 3, "Th": 4, "Fr": 5, "Sa": 6}
+
+func (yylex *Lexer) Error(e string) {
+	yylex.parseResult = errors.New(e)
+}
+
+func main() {
+  s := "Mo 11:00-12:00;24/7;Tu 06:00-05:00"
+	lex := NewLexer(bytes.NewBufferString(s))
+  yyParse(lex)
+	switch x := lex.parseResult.(type){
+	case error:
+		fmt.Println("error:", x)
+	case []TimeRange:
+		fmt.Println("result:", x)
+	}
+}

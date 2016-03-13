@@ -1,0 +1,182 @@
+
+state 0
+	$accept: .root $end 
+	root: .    (1)
+
+	WEEKDAY  shift 5
+	'2'  shift 6
+	.  reduce 1 (src line 48)
+
+	selector  goto 3
+	always  goto 4
+	selectors  goto 2
+	root  goto 1
+
+state 1
+	$accept:  root.$end 
+
+	$end  accept
+	.  error
+
+
+state 2
+	root:  selectors.    (2)
+
+	.  reduce 2 (src line 49)
+
+
+state 3
+	selectors:  selector.selector_seq 
+	selector_seq: .    (4)
+
+	';'  shift 8
+	.  reduce 4 (src line 62)
+
+	selector_seq  goto 7
+
+state 4
+	selector:  always.    (6)
+
+	.  reduce 6 (src line 69)
+
+
+state 5
+	selector:  WEEKDAY.' ' timespan 
+
+	' '  shift 9
+	.  error
+
+
+state 6
+	always:  '2'.'4' '/' '7' 
+
+	'4'  shift 10
+	.  error
+
+
+state 7
+	selectors:  selector selector_seq.    (3)
+
+	.  reduce 3 (src line 56)
+
+
+state 8
+	selector_seq:  ';'.selectors 
+
+	WEEKDAY  shift 5
+	'2'  shift 6
+	.  error
+
+	selector  goto 3
+	always  goto 4
+	selectors  goto 11
+
+state 9
+	selector:  WEEKDAY ' '.timespan 
+
+	NUM  shift 15
+	.  error
+
+	time  goto 13
+	hour  goto 14
+	timespan  goto 12
+
+state 10
+	always:  '2' '4'.'/' '7' 
+
+	'/'  shift 16
+	.  error
+
+
+state 11
+	selector_seq:  ';' selectors.    (5)
+
+	.  reduce 5 (src line 64)
+
+
+state 12
+	selector:  WEEKDAY ' ' timespan.    (7)
+
+	.  reduce 7 (src line 70)
+
+
+state 13
+	timespan:  time.'-' time 
+
+	'-'  shift 17
+	.  error
+
+
+state 14
+	time:  hour.':' minute 
+
+	':'  shift 18
+	.  error
+
+
+state 15
+	hour:  NUM.    (11)
+
+	.  reduce 11 (src line 103)
+
+
+state 16
+	always:  '2' '4' '/'.'7' 
+
+	'7'  shift 19
+	.  error
+
+
+state 17
+	timespan:  time '-'.time 
+
+	NUM  shift 15
+	.  error
+
+	time  goto 20
+	hour  goto 14
+
+state 18
+	time:  hour ':'.minute 
+
+	NUM  shift 22
+	.  error
+
+	minute  goto 21
+
+state 19
+	always:  '2' '4' '/' '7'.    (8)
+
+	.  reduce 8 (src line 78)
+
+
+state 20
+	timespan:  time '-' time.    (9)
+
+	.  reduce 9 (src line 81)
+
+
+state 21
+	time:  hour ':' minute.    (10)
+
+	.  reduce 10 (src line 93)
+
+
+state 22
+	minute:  NUM.    (12)
+
+	.  reduce 12 (src line 109)
+
+
+14 terminals, 10 nonterminals
+13 grammar rules, 23/2000 states
+0 shift/reduce, 0 reduce/reduce conflicts reported
+59 working sets used
+memory: parser 13/30000
+4 extra closures
+14 shift entries, 1 exceptions
+11 goto entries
+3 entries saved by goto default
+Optimizer space used: output 22/30000
+22 table entries, 0 zero
+maximum spread: 14, maximum offset: 17
