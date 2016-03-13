@@ -2,9 +2,7 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"strconv"
 )
 import (
 	"bufio"
@@ -169,6 +167,75 @@ func NewLexerWithInit(in io.Reader, initFun func(*Lexer)) *Lexer {
 		ch <- frame{-1, "", line, column}
 	}
 	go scan(bufio.NewReader(in), yylex.ch, []dfa{
+		// 24\/7
+		{[]bool{false, false, false, false, true}, []func(rune) int{ // Transitions
+			func(r rune) int {
+				switch r {
+				case 47:
+					return -1
+				case 50:
+					return 1
+				case 52:
+					return -1
+				case 55:
+					return -1
+				}
+				return -1
+			},
+			func(r rune) int {
+				switch r {
+				case 47:
+					return -1
+				case 50:
+					return -1
+				case 52:
+					return 2
+				case 55:
+					return -1
+				}
+				return -1
+			},
+			func(r rune) int {
+				switch r {
+				case 47:
+					return 3
+				case 50:
+					return -1
+				case 52:
+					return -1
+				case 55:
+					return -1
+				}
+				return -1
+			},
+			func(r rune) int {
+				switch r {
+				case 47:
+					return -1
+				case 50:
+					return -1
+				case 52:
+					return -1
+				case 55:
+					return 4
+				}
+				return -1
+			},
+			func(r rune) int {
+				switch r {
+				case 47:
+					return -1
+				case 50:
+					return -1
+				case 52:
+					return -1
+				case 55:
+					return -1
+				}
+				return -1
+			},
+		}, []int{ /* Start-of-input transitions */ -1, -1, -1, -1, -1}, []int{ /* End-of-input transitions */ -1, -1, -1, -1, -1}, nil},
+
 		// Su|Mo|Tu|We|Th|Fr|Sa
 		{[]bool{false, false, false, false, false, false, true, true, true, true, true, true, true}, []func(rune) int{ // Transitions
 			func(r rune) int {
@@ -524,31 +591,6 @@ func NewLexerWithInit(in io.Reader, initFun func(*Lexer)) *Lexer {
 			},
 		}, []int{ /* Start-of-input transitions */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, []int{ /* End-of-input transitions */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, nil},
 
-		// [0-9][0-9]
-		{[]bool{false, false, true}, []func(rune) int{ // Transitions
-			func(r rune) int {
-				switch {
-				case 48 <= r && r <= 57:
-					return 1
-				}
-				return -1
-			},
-			func(r rune) int {
-				switch {
-				case 48 <= r && r <= 57:
-					return 2
-				}
-				return -1
-			},
-			func(r rune) int {
-				switch {
-				case 48 <= r && r <= 57:
-					return -1
-				}
-				return -1
-			},
-		}, []int{ /* Start-of-input transitions */ -1, -1, -1}, []int{ /* End-of-input transitions */ -1, -1, -1}, nil},
-
 		// .
 		{[]bool{false, true}, []func(rune) int{ // Transitions
 			func(r rune) int {
@@ -619,17 +661,14 @@ OUTER0:
 		switch yylex.next(0) {
 		case 0:
 			{
+				return ALWAYS
+			}
+		case 1:
+			{
 				fmt.Printf("parsing weekday: %s\n", yylex.Text())
 				lval.num, _ = weekdays[yylex.Text()]
 				fmt.Printf("weekday is: %d\n", lval.num)
 				return WEEKDAY
-			}
-		case 1:
-			{
-				fmt.Printf("parsing NUM: %s\n", yylex.Text())
-				lval.num, _ = strconv.Atoi(yylex.Text())
-				fmt.Printf("num is: %d\n", lval.num)
-				return NUM
 			}
 		case 2:
 			{
@@ -649,17 +688,23 @@ OUTER0:
 var weekdays = map[string]int{"Su": 0, "Mo": 1, "Tu": 2, "We": 3, "Th": 4, "Fr": 5, "Sa": 6}
 
 func (yylex *Lexer) Error(e string) {
-	yylex.parseResult = errors.New(e)
+	switch yylex.parseResult.(type) {
+	case []error: //nothing to do
+	default:
+		yylex.parseResult = make([]error, 0)
+	}
+	yylex.parseResult = append(yylex.parseResult.([]error), fmt.Errorf("%d:%d %v", yylex.Line(), yylex.Column(), e))
 }
 
 func main() {
-	s := "Mo 11:00-12:00;24/7;Tu 06:00-05:00"
+	s := "Mo-Tu,Sa 11:00-12:00,13:00-14:00;Tu 05:00-06:00"
+	fmt.Println(s)
 	lex := NewLexer(bytes.NewBufferString(s))
 	yyParse(lex)
 	switch x := lex.parseResult.(type) {
-	case error:
-		fmt.Println("error:", x)
-	case []TimeRange:
+	case []error:
+		fmt.Println(x)
+	case [][]TimeRange:
 		fmt.Println("result:", x)
 	}
 }
