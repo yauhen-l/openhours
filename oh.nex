@@ -1,10 +1,15 @@
 /24\/7/			           { return ALWAYS }
+/Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec/ {
+																									 fmt.Printf("parsing month: %s\n", yylex.Text())
+																									 lval.num,_ = months[yylex.Text()]
+																									 return MONTH
+																									}
 /Su|Mo|Tu|We|Th|Fr|Sa/ {
 												fmt.Printf("parsing weekday: %s\n", yylex.Text())
 												lval.num,_ = weekdays[yylex.Text()]
-												fmt.Printf("weekday is: %d\n", lval.num)
 												return WEEKDAY
 											 }
+/ /                    { return SEP } 											 
 /./                    {
 											  fmt.Printf("parsing symbol: %s\n", yylex.Text())
 											  return int(yylex.Text()[0])
@@ -16,6 +21,7 @@ import (
 			 "fmt"
 )
 
+var months = map[string]int{"Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "May": 4, "Jun": 5, "Jul": 6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11}
 var weekdays = map[string]int{"Su": 0, "Mo": 1, "Tu": 2, "We": 3, "Th": 4, "Fr": 5, "Sa": 6}
 
 func (yylex *Lexer) Error(e string) {
@@ -28,14 +34,14 @@ func (yylex *Lexer) Error(e string) {
 }
 
 func main() {
-  s := "Mo-Tu,Sa 11:00-12:00,13:00-14:00;Tu 05:00-06:00"
+  s := "Mo-Tu,Sa 11:00-12:00,13:00-14:00;31 05:00-06:00"
 	fmt.Println(s)
 	lex := NewLexer(bytes.NewBufferString(s))
   yyParse(lex)
 	switch x := lex.parseResult.(type){
 	case []error:
 		fmt.Println(x)
-	case [][]TimeRange:
+	case Monthly:
 		fmt.Println("result:", x)
 	}
 }

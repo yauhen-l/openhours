@@ -3,31 +3,35 @@ state 0
 	$accept: .root $end 
 	root: .    (1)
 
-	WEEKDAY  shift 10
-	ALWAYS  shift 7
-	'0'  shift 15
-	'1'  shift 16
-	'2'  shift 17
-	'3'  shift 18
-	'4'  shift 19
-	'5'  shift 20
-	'6'  shift 21
-	'7'  shift 22
-	'8'  shift 23
-	'9'  shift 24
-	.  reduce 1 (src line 69)
+	WEEKDAY  shift 15
+	MONTH  shift 6
+	ALWAYS  shift 4
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
+	.  reduce 1 (src line 163)
 
-	time  goto 11
-	hour  goto 12
-	DIGIT  goto 14
-	NUM  goto 13
-	ws  goto 8
-	weekdays  goto 5
-	timespan  goto 9
-	timespans  goto 6
-	always  goto 4
+	time  goto 16
+	hour  goto 18
+	day  goto 11
+	DIGIT  goto 17
+	NUM  goto 14
+	ws  goto 12
+	weekdays  goto 9
+	days  goto 5
+	ds  goto 8
+	timespan  goto 13
+	timespans  goto 10
 	selector  goto 3
 	selectors  goto 2
+	small_range_selector  goto 7
 	root  goto 1
 
 state 1
@@ -40,375 +44,589 @@ state 1
 state 2
 	root:  selectors.    (2)
 
-	.  reduce 2 (src line 70)
+	.  reduce 2 (src line 164)
 
 
 state 3
 	selectors:  selector.selector_seq 
 	selector_seq: .    (4)
 
-	';'  shift 26
-	.  reduce 4 (src line 83)
+	';'  shift 30
+	.  reduce 4 (src line 177)
 
-	selector_seq  goto 25
+	selector_seq  goto 29
 
 state 4
-	selector:  always.    (6)
+	selector:  ALWAYS.    (6)
 
-	.  reduce 6 (src line 90)
+	.  reduce 6 (src line 184)
 
 
 state 5
-	selector:  weekdays.' ' timespans 
+	selector:  days.SEP MONTH SEP small_range_selector 
+	selector:  days.SEP small_range_selector 
 
-	' '  shift 27
+	SEP  shift 31
 	.  error
 
 
 state 6
-	selector:  timespans.    (8)
+	selector:  MONTH.SEP small_range_selector 
 
-	.  reduce 8 (src line 96)
+	SEP  shift 32
+	.  error
 
 
 state 7
-	always:  ALWAYS.    (9)
+	selector:  small_range_selector.    (10)
 
-	.  reduce 9 (src line 99)
+	.  reduce 10 (src line 206)
 
 
 state 8
-	weekdays:  ws.weekdays_seq 
-	weekdays_seq: .    (13)
+	days:  ds.more_days 
+	more_days: .    (14)
 
-	','  shift 29
-	.  reduce 13 (src line 125)
+	','  shift 34
+	.  reduce 14 (src line 235)
 
-	weekdays_seq  goto 28
+	more_days  goto 33
 
 state 9
-	timespans:  timespan.timespans_seq 
-	timespans_seq: .    (16)
+	small_range_selector:  weekdays.    (16)
+	small_range_selector:  weekdays.SEP timespans 
 
-	','  shift 31
-	.  reduce 16 (src line 139)
+	SEP  shift 35
+	.  reduce 16 (src line 242)
 
-	timespans_seq  goto 30
 
 state 10
-	ws:  WEEKDAY.    (11)
-	ws:  WEEKDAY.'-' WEEKDAY 
+	small_range_selector:  timespans.    (18)
 
-	'-'  shift 32
-	.  reduce 11 (src line 108)
+	.  reduce 18 (src line 247)
 
 
 state 11
-	timespan:  time.'-' time 
+	ds:  day.    (12)
+	ds:  day.'-' day 
 
-	'-'  shift 33
-	.  error
+	'-'  shift 36
+	.  reduce 12 (src line 220)
 
 
 state 12
-	time:  hour.':' minute 
+	weekdays:  ws.weekdays_seq 
+	weekdays_seq: .    (22)
 
-	':'  shift 34
-	.  error
+	','  shift 38
+	.  reduce 22 (src line 274)
 
+	weekdays_seq  goto 37
 
 state 13
-	hour:  NUM.    (20)
+	timespans:  timespan.timespans_seq 
+	timespans_seq: .    (25)
 
-	.  reduce 20 (src line 165)
+	','  shift 40
+	.  reduce 25 (src line 288)
 
+	timespans_seq  goto 39
 
 state 14
-	NUM:  DIGIT.DIGIT 
+	hour:  NUM.    (29)
+	day:  NUM.    (31)
 
-	'0'  shift 15
-	'1'  shift 16
-	'2'  shift 17
-	'3'  shift 18
-	'4'  shift 19
-	'5'  shift 20
-	'6'  shift 21
-	'7'  shift 22
-	'8'  shift 23
-	'9'  shift 24
-	.  error
+	':'  reduce 29 (src line 314)
+	.  reduce 31 (src line 332)
 
-	DIGIT  goto 35
 
 state 15
-	DIGIT:  '0'.    (23)
+	ws:  WEEKDAY.    (20)
+	ws:  WEEKDAY.'-' WEEKDAY 
 
-	.  reduce 23 (src line 187)
+	'-'  shift 41
+	.  reduce 20 (src line 257)
 
 
 state 16
-	DIGIT:  '1'.    (24)
+	timespan:  time.'-' time 
 
-	.  reduce 24 (src line 187)
+	'-'  shift 42
+	.  error
 
 
 state 17
-	DIGIT:  '2'.    (25)
+	NUM:  DIGIT.DIGIT 
 
-	.  reduce 25 (src line 187)
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
+	.  error
 
+	DIGIT  goto 43
 
 state 18
-	DIGIT:  '3'.    (26)
+	time:  hour.':' minute 
 
-	.  reduce 26 (src line 188)
+	':'  shift 44
+	.  error
 
 
 state 19
-	DIGIT:  '4'.    (27)
+	DIGIT:  '0'.    (33)
 
-	.  reduce 27 (src line 188)
+	.  reduce 33 (src line 343)
 
 
 state 20
-	DIGIT:  '5'.    (28)
+	DIGIT:  '1'.    (34)
 
-	.  reduce 28 (src line 188)
+	.  reduce 34 (src line 343)
 
 
 state 21
-	DIGIT:  '6'.    (29)
+	DIGIT:  '2'.    (35)
 
-	.  reduce 29 (src line 189)
+	.  reduce 35 (src line 343)
 
 
 state 22
-	DIGIT:  '7'.    (30)
+	DIGIT:  '3'.    (36)
 
-	.  reduce 30 (src line 189)
+	.  reduce 36 (src line 343)
 
 
 state 23
-	DIGIT:  '8'.    (31)
+	DIGIT:  '4'.    (37)
 
-	.  reduce 31 (src line 189)
+	.  reduce 37 (src line 343)
 
 
 state 24
-	DIGIT:  '9'.    (32)
+	DIGIT:  '5'.    (38)
 
-	.  reduce 32 (src line 189)
+	.  reduce 38 (src line 343)
 
 
 state 25
-	selectors:  selector selector_seq.    (3)
+	DIGIT:  '6'.    (39)
 
-	.  reduce 3 (src line 80)
+	.  reduce 39 (src line 343)
 
 
 state 26
-	selector_seq:  ';'.selectors 
+	DIGIT:  '7'.    (40)
 
-	WEEKDAY  shift 10
-	ALWAYS  shift 7
-	'0'  shift 15
-	'1'  shift 16
-	'2'  shift 17
-	'3'  shift 18
-	'4'  shift 19
-	'5'  shift 20
-	'6'  shift 21
-	'7'  shift 22
-	'8'  shift 23
-	'9'  shift 24
-	.  error
+	.  reduce 40 (src line 343)
 
-	time  goto 11
-	hour  goto 12
-	DIGIT  goto 14
-	NUM  goto 13
-	ws  goto 8
-	weekdays  goto 5
-	timespan  goto 9
-	timespans  goto 6
-	always  goto 4
-	selector  goto 3
-	selectors  goto 36
 
 state 27
-	selector:  weekdays ' '.timespans 
+	DIGIT:  '8'.    (41)
 
-	'0'  shift 15
-	'1'  shift 16
-	'2'  shift 17
-	'3'  shift 18
-	'4'  shift 19
-	'5'  shift 20
-	'6'  shift 21
-	'7'  shift 22
-	'8'  shift 23
-	'9'  shift 24
-	.  error
+	.  reduce 41 (src line 343)
 
-	time  goto 11
-	hour  goto 12
-	DIGIT  goto 14
-	NUM  goto 13
-	timespan  goto 9
-	timespans  goto 37
 
 state 28
-	weekdays:  ws weekdays_seq.    (10)
+	DIGIT:  '9'.    (42)
 
-	.  reduce 10 (src line 102)
+	.  reduce 42 (src line 343)
 
 
 state 29
-	weekdays_seq:  ','.weekdays 
+	selectors:  selector selector_seq.    (3)
 
-	WEEKDAY  shift 10
-	.  error
+	.  reduce 3 (src line 174)
 
-	ws  goto 8
-	weekdays  goto 38
 
 state 30
-	timespans:  timespan timespans_seq.    (15)
+	selector_seq:  ';'.selectors 
 
-	.  reduce 15 (src line 136)
+	WEEKDAY  shift 15
+	MONTH  shift 6
+	ALWAYS  shift 4
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
+	.  error
 
+	time  goto 16
+	hour  goto 18
+	day  goto 11
+	DIGIT  goto 17
+	NUM  goto 14
+	ws  goto 12
+	weekdays  goto 9
+	days  goto 5
+	ds  goto 8
+	timespan  goto 13
+	timespans  goto 10
+	selector  goto 3
+	selectors  goto 45
+	small_range_selector  goto 7
 
 state 31
-	timespans_seq:  ','.timespans 
+	selector:  days SEP.MONTH SEP small_range_selector 
+	selector:  days SEP.small_range_selector 
 
-	'0'  shift 15
-	'1'  shift 16
-	'2'  shift 17
-	'3'  shift 18
-	'4'  shift 19
-	'5'  shift 20
-	'6'  shift 21
-	'7'  shift 22
-	'8'  shift 23
-	'9'  shift 24
+	WEEKDAY  shift 15
+	MONTH  shift 46
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
 	.  error
 
-	time  goto 11
-	hour  goto 12
-	DIGIT  goto 14
-	NUM  goto 13
-	timespan  goto 9
-	timespans  goto 39
+	time  goto 16
+	hour  goto 18
+	DIGIT  goto 17
+	NUM  goto 48
+	ws  goto 12
+	weekdays  goto 9
+	timespan  goto 13
+	timespans  goto 10
+	small_range_selector  goto 47
 
 state 32
-	ws:  WEEKDAY '-'.WEEKDAY 
+	selector:  MONTH SEP.small_range_selector 
 
-	WEEKDAY  shift 40
+	WEEKDAY  shift 15
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
 	.  error
 
+	time  goto 16
+	hour  goto 18
+	DIGIT  goto 17
+	NUM  goto 48
+	ws  goto 12
+	weekdays  goto 9
+	timespan  goto 13
+	timespans  goto 10
+	small_range_selector  goto 49
 
 state 33
-	timespan:  time '-'.time 
+	days:  ds more_days.    (11)
 
-	'0'  shift 15
-	'1'  shift 16
-	'2'  shift 17
-	'3'  shift 18
-	'4'  shift 19
-	'5'  shift 20
-	'6'  shift 21
-	'7'  shift 22
-	'8'  shift 23
-	'9'  shift 24
-	.  error
+	.  reduce 11 (src line 214)
 
-	time  goto 41
-	hour  goto 12
-	DIGIT  goto 14
-	NUM  goto 13
 
 state 34
-	time:  hour ':'.minute 
+	more_days:  ','.days 
 
-	'0'  shift 15
-	'1'  shift 16
-	'2'  shift 17
-	'3'  shift 18
-	'4'  shift 19
-	'5'  shift 20
-	'6'  shift 21
-	'7'  shift 22
-	'8'  shift 23
-	'9'  shift 24
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
 	.  error
 
-	minute  goto 42
-	DIGIT  goto 14
-	NUM  goto 43
+	day  goto 11
+	DIGIT  goto 17
+	NUM  goto 51
+	days  goto 50
+	ds  goto 8
 
 state 35
-	NUM:  DIGIT DIGIT.    (22)
+	small_range_selector:  weekdays SEP.timespans 
 
-	.  reduce 22 (src line 183)
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
+	.  error
 
+	time  goto 16
+	hour  goto 18
+	DIGIT  goto 17
+	NUM  goto 48
+	timespan  goto 13
+	timespans  goto 52
 
 state 36
-	selector_seq:  ';' selectors.    (5)
+	ds:  day '-'.day 
 
-	.  reduce 5 (src line 85)
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
+	.  error
 
+	day  goto 53
+	DIGIT  goto 17
+	NUM  goto 51
 
 state 37
-	selector:  weekdays ' ' timespans.    (7)
+	weekdays:  ws weekdays_seq.    (19)
 
-	.  reduce 7 (src line 91)
+	.  reduce 19 (src line 251)
 
 
 state 38
-	weekdays_seq:  ',' weekdays.    (14)
+	weekdays_seq:  ','.weekdays 
 
-	.  reduce 14 (src line 129)
+	WEEKDAY  shift 15
+	.  error
 
+	ws  goto 12
+	weekdays  goto 54
 
 state 39
-	timespans_seq:  ',' timespans.    (17)
+	timespans:  timespan timespans_seq.    (24)
 
-	.  reduce 17 (src line 140)
+	.  reduce 24 (src line 285)
 
 
 state 40
-	ws:  WEEKDAY '-' WEEKDAY.    (12)
+	timespans_seq:  ','.timespans 
 
-	.  reduce 12 (src line 112)
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
+	.  error
 
+	time  goto 16
+	hour  goto 18
+	DIGIT  goto 17
+	NUM  goto 48
+	timespan  goto 13
+	timespans  goto 55
 
 state 41
-	timespan:  time '-' time.    (18)
+	ws:  WEEKDAY '-'.WEEKDAY 
 
-	.  reduce 18 (src line 144)
+	WEEKDAY  shift 56
+	.  error
 
 
 state 42
-	time:  hour ':' minute.    (19)
+	timespan:  time '-'.time 
 
-	.  reduce 19 (src line 155)
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
+	.  error
 
+	time  goto 57
+	hour  goto 18
+	DIGIT  goto 17
+	NUM  goto 48
 
 state 43
-	minute:  NUM.    (21)
+	NUM:  DIGIT DIGIT.    (32)
 
-	.  reduce 21 (src line 174)
+	.  reduce 32 (src line 339)
 
 
-20 terminals, 17 nonterminals
-33 grammar rules, 44/2000 states
+state 44
+	time:  hour ':'.minute 
+
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
+	.  error
+
+	minute  goto 58
+	DIGIT  goto 17
+	NUM  goto 59
+
+state 45
+	selector_seq:  ';' selectors.    (5)
+
+	.  reduce 5 (src line 179)
+
+
+state 46
+	selector:  days SEP MONTH.SEP small_range_selector 
+
+	SEP  shift 60
+	.  error
+
+
+state 47
+	selector:  days SEP small_range_selector.    (8)
+
+	.  reduce 8 (src line 196)
+
+
+state 48
+	hour:  NUM.    (29)
+
+	.  reduce 29 (src line 314)
+
+
+state 49
+	selector:  MONTH SEP small_range_selector.    (9)
+
+	.  reduce 9 (src line 201)
+
+
+state 50
+	more_days:  ',' days.    (15)
+
+	.  reduce 15 (src line 237)
+
+
+state 51
+	day:  NUM.    (31)
+
+	.  reduce 31 (src line 332)
+
+
+state 52
+	small_range_selector:  weekdays SEP timespans.    (17)
+
+	.  reduce 17 (src line 245)
+
+
+state 53
+	ds:  day '-' day.    (13)
+
+	.  reduce 13 (src line 222)
+
+
+state 54
+	weekdays_seq:  ',' weekdays.    (23)
+
+	.  reduce 23 (src line 278)
+
+
+state 55
+	timespans_seq:  ',' timespans.    (26)
+
+	.  reduce 26 (src line 289)
+
+
+state 56
+	ws:  WEEKDAY '-' WEEKDAY.    (21)
+
+	.  reduce 21 (src line 261)
+
+
+state 57
+	timespan:  time '-' time.    (27)
+
+	.  reduce 27 (src line 293)
+
+
+state 58
+	time:  hour ':' minute.    (28)
+
+	.  reduce 28 (src line 304)
+
+
+state 59
+	minute:  NUM.    (30)
+
+	.  reduce 30 (src line 323)
+
+
+state 60
+	selector:  days SEP MONTH SEP.small_range_selector 
+
+	WEEKDAY  shift 15
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
+	.  error
+
+	time  goto 16
+	hour  goto 18
+	DIGIT  goto 17
+	NUM  goto 48
+	ws  goto 12
+	weekdays  goto 9
+	timespan  goto 13
+	timespans  goto 10
+	small_range_selector  goto 61
+
+state 61
+	selector:  days SEP MONTH SEP small_range_selector.    (7)
+
+	.  reduce 7 (src line 191)
+
+
+21 terminals, 21 nonterminals
+43 grammar rules, 62/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
-66 working sets used
-memory: parser 54/30000
-28 extra closures
-83 shift entries, 1 exceptions
-23 goto entries
-25 entries saved by goto default
-Optimizer space used: output 54/30000
-54 table entries, 0 zero
-maximum spread: 20, maximum offset: 34
+70 working sets used
+memory: parser 114/30000
+16 extra closures
+144 shift entries, 2 exceptions
+36 goto entries
+54 entries saved by goto default
+Optimizer space used: output 100/30000
+100 table entries, 4 zero
+maximum spread: 21, maximum offset: 60

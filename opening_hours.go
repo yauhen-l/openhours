@@ -5,66 +5,161 @@ import __yyfmt__ "fmt"
 
 //line opening_hours.y:4
 import (
+	"bytes"
 	"fmt"
+	"time"
 )
 
-var wholeWeek = [...]int{0, 1, 2, 3, 4, 5, 6}
+var any = -1
+var wholeWeek = []int{-1}
+var wholeDay = []TimeRange{NewTimeRange(0, 1440)}
+
+type OpeningHours struct {
+	data       Monthly // Month -> Day -> Weekday -> Hours
+	definition string
+}
+
+func (oh *OpeningHours) Match(t time.Time) bool {
+	return oh.data.Match(t)
+}
+
+func (oh *OpeningHours) Definition() string {
+	return oh.definition
+}
 
 type TimeRange struct {
 	Start int
 	End   int
 }
 
+func (tr TimeRange) Match(t time.Time) bool {
+	minutes := int(t.Hour()*60 + t.Minute())
+	return tr.Start <= minutes && minutes < tr.End
+}
+
+type Monthly map[int]map[int]Weekly
+
+func (m Monthly) Match(t time.Time) bool {
+	for _, month := range []int{any, int(t.Month()) - 1} {
+		d, ok := m[month]
+		if ok {
+			for _, day := range []int{any, int(t.Day()) - 1} {
+				w, ok := d[day]
+				if ok && w.Match(t) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+type Weekly map[int][]TimeRange
+
+func (w Weekly) Match(t time.Time) bool {
+	for _, weekday := range []int{any, int(t.Weekday())} {
+		wd, ok := w[weekday]
+		if ok {
+			for _, tr := range wd {
+				if tr.Match(t) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func makeMonthly(month int, days []int) Monthly {
+	m := make(Monthly)
+	m[month] = make(map[int]Weekly)
+	for _, day := range days {
+		m[month][day] = make(Weekly)
+	}
+	return m
+}
+
+func setWeekly(monthly Monthly, weekly Weekly) Monthly {
+	for _, days := range monthly {
+		for d, _ := range days {
+			days[d] = weekly
+		}
+	}
+	return monthly
+}
+
+func mergeMonthly(m1, m2 Monthly) Monthly {
+	for m, _ := range m2 {
+		if _, ok := m1[m]; ok {
+			m1[m] = mergeMonthdays(m1[m], m2[m])
+		} else {
+			m1[m] = m2[m]
+		}
+	}
+	return m1
+}
+
+func mergeMonthdays(d1, d2 map[int]Weekly) map[int]Weekly {
+	for d, _ := range d2 {
+		if _, ok := d1[d]; ok {
+			d1[d] = mergeWeeklyTimeRanges(d1[d], d2[d])
+		} else {
+			d1[d] = d2[d]
+		}
+	}
+	return d1
+}
+
 func NewTimeRange(start, end int) TimeRange {
 	return TimeRange{Start: start, End: end}
 }
 
-func makeWeekly() [][]TimeRange {
-	weekly := make([][]TimeRange, 7)
-	for i, _ := range weekly {
-		weekly[i] = make([]TimeRange, 0)
-	}
-	return weekly
-}
-
-func appendWeeklyTimeRanges(weekly [][]TimeRange, weeks []int, trs []TimeRange) [][]TimeRange {
+func appendWeeklyTimeRanges(weekly Weekly, weeks []int, trs []TimeRange) Weekly {
 	for _, w := range weeks {
 		weekly[w] = append(weekly[w], trs...)
 	}
 	return weekly
 }
 
-func mergeWeeklyTimeRanges(w1, w2 [][]TimeRange) [][]TimeRange {
-	for i, _ := range w1 {
-		w1[i] = append(w1[i], w2[i]...)
+func mergeWeeklyTimeRanges(w1, w2 Weekly) Weekly {
+	for i, _ := range w2 {
+		if _, ok := w1[i]; ok {
+			w1[i] = append(w1[i], w2[i]...)
+		} else {
+			w1[i] = w2[i]
+		}
 	}
 	return w1
 }
 
-//line opening_hours.y:45
+//line opening_hours.y:137
 type yySymType struct {
-	yys        int
-	num        int
-	nums       []int
-	continuous bool
-	tr         TimeRange
-	trs        []TimeRange
-	weekly     [][]TimeRange
+	yys     int
+	num     int
+	nums    []int
+	tr      TimeRange
+	trs     []TimeRange
+	weekly  Weekly
+	monthly Monthly
 }
 
 const WEEKDAY = 57346
-const ALWAYS = 57347
+const MONTH = 57347
+const ALWAYS = 57348
+const SEP = 57349
 
 var yyToknames = [...]string{
 	"$end",
 	"error",
 	"$unk",
 	"WEEKDAY",
+	"MONTH",
 	"ALWAYS",
+	"SEP",
 	"'-'",
 	"':'",
 	"';'",
-	"' '",
 	"','",
 	"'0'",
 	"'1'",
@@ -83,93 +178,116 @@ const yyEofCode = 1
 const yyErrCode = 2
 const yyMaxDepth = 200
 
-//line opening_hours.y:192
+//line opening_hours.y:346
 
-/*
-func CompileOpeningHours(s string) ([]TimeRange, err) {
-		defer
+func CompileOpeningHours(s string) (*OpeningHours, []error) {
+	lex := NewLexer(bytes.NewBufferString(s))
+	yyParse(lex)
+	switch x := lex.parseResult.(type) {
+	case []error:
+		return nil, x
+	case Monthly:
+		return &OpeningHours{data: x, definition: s}, nil
+	default:
+		return nil, []error{fmt.Errorf("unsupported result: %T", x)}
+	}
 }
-*/
 
 //line yacctab:1
 var yyExca = [...]int{
 	-1, 1,
 	1, -1,
 	-2, 0,
+	-1, 14,
+	9, 29,
+	-2, 31,
 }
 
-const yyNprod = 33
+const yyNprod = 43
 const yyPrivate = 57344
 
 var yyTokenNames []string
 var yyStates []string
 
-const yyLast = 54
+const yyLast = 100
 
 var yyAct = [...]int{
 
-	13, 6, 11, 10, 7, 2, 14, 5, 31, 27,
-	15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-	29, 35, 26, 34, 33, 32, 40, 10, 1, 37,
-	25, 3, 36, 39, 4, 43, 41, 38, 15, 16,
-	17, 18, 19, 20, 21, 22, 23, 24, 30, 9,
-	28, 8, 42, 12,
+	7, 16, 11, 48, 14, 10, 9, 5, 15, 6,
+	4, 17, 2, 40, 38, 30, 19, 20, 21, 22,
+	23, 24, 25, 26, 27, 28, 34, 44, 42, 43,
+	41, 36, 47, 49, 14, 60, 35, 32, 51, 53,
+	51, 52, 50, 45, 57, 54, 55, 31, 59, 56,
+	15, 1, 29, 3, 15, 46, 39, 13, 33, 8,
+	37, 61, 19, 20, 21, 22, 23, 24, 25, 26,
+	27, 28, 15, 12, 58, 18, 0, 0, 0, 0,
+	19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+	19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
 }
 var yyPact = [...]int{
 
-	-1, -1000, -1000, 14, -1000, 0, -1000, -1000, 10, -2,
-	19, 18, 16, -1000, 27, -1000, -1000, -1000, -1000, -1000,
-	-1000, -1000, -1000, -1000, -1000, -1000, -1, 27, -1000, 23,
-	-1000, 27, 22, 27, 27, -1000, -1000, -1000, -1000, -1000,
-	-1000, -1000, -1000, -1000,
+	4, -1000, -1000, 5, -1000, 40, 30, -1000, 15, 29,
+	-1000, 23, 3, 2, -1000, 22, 20, 78, 18, -1000,
+	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	4, 50, 68, -1000, 78, 78, 78, -1000, 46, -1000,
+	78, 45, 78, -1000, 78, -1000, 28, -1000, -1000, -1000,
+	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	68, -1000,
 }
 var yyPgo = [...]int{
 
-	0, 2, 53, 52, 6, 0, 51, 7, 50, 49,
-	1, 48, 34, 31, 5, 30, 28,
+	0, 1, 75, 74, 2, 11, 3, 73, 6, 60,
+	7, 59, 58, 57, 5, 56, 53, 12, 52, 0,
+	51,
 }
 var yyR1 = [...]int{
 
-	0, 16, 16, 14, 15, 15, 13, 13, 13, 12,
-	7, 6, 6, 8, 8, 10, 11, 11, 9, 1,
-	2, 3, 5, 4, 4, 4, 4, 4, 4, 4,
-	4, 4, 4,
+	0, 20, 20, 17, 18, 18, 16, 16, 16, 16,
+	16, 10, 11, 11, 12, 12, 19, 19, 19, 8,
+	7, 7, 9, 9, 14, 15, 15, 13, 1, 2,
+	3, 4, 6, 5, 5, 5, 5, 5, 5, 5,
+	5, 5, 5,
 }
 var yyR2 = [...]int{
 
-	0, 0, 1, 2, 0, 2, 1, 3, 1, 1,
-	2, 1, 3, 0, 2, 2, 0, 2, 3, 3,
+	0, 0, 1, 2, 0, 2, 1, 5, 3, 3,
+	1, 2, 1, 3, 0, 2, 1, 3, 1, 2,
+	1, 3, 0, 2, 2, 0, 2, 3, 3, 1,
 	1, 1, 2, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1,
 }
 var yyChk = [...]int{
 
-	-1000, -16, -14, -13, -12, -7, -10, 5, -6, -9,
-	4, -1, -2, -5, -4, 11, 12, 13, 14, 15,
-	16, 17, 18, 19, 20, -15, 8, 9, -8, 10,
-	-11, 10, 6, 6, 7, -4, -14, -10, -7, -10,
-	4, -1, -3, -5,
+	-1000, -20, -17, -16, 6, -10, 5, -19, -11, -8,
+	-14, -4, -7, -13, -6, 4, -1, -5, -2, 12,
+	13, 14, 15, 16, 17, 18, 19, 20, 21, -18,
+	10, 7, 7, -12, 11, 7, 8, -9, 11, -15,
+	11, 8, 8, -5, 9, -17, 5, -19, -6, -19,
+	-10, -6, -14, -4, -8, -14, 4, -1, -3, -6,
+	7, -19,
 }
 var yyDef = [...]int{
 
-	1, -2, 2, 4, 6, 0, 8, 9, 13, 16,
-	11, 0, 0, 20, 0, 23, 24, 25, 26, 27,
-	28, 29, 30, 31, 32, 3, 0, 0, 10, 0,
-	15, 0, 0, 0, 0, 22, 5, 7, 14, 17,
-	12, 18, 19, 21,
+	1, -2, 2, 4, 6, 0, 0, 10, 14, 16,
+	18, 12, 22, 25, -2, 20, 0, 0, 0, 33,
+	34, 35, 36, 37, 38, 39, 40, 41, 42, 3,
+	0, 0, 0, 11, 0, 0, 0, 19, 0, 24,
+	0, 0, 0, 32, 0, 5, 0, 8, 29, 9,
+	15, 31, 17, 13, 23, 26, 21, 27, 28, 30,
+	0, 7,
 }
 var yyTok1 = [...]int{
 
 	1, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 9, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 10, 6, 3, 3, 11, 12,
-	13, 14, 15, 16, 17, 18, 19, 20, 7, 8,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 11, 8, 3, 3, 12, 13,
+	14, 15, 16, 17, 18, 19, 20, 21, 9, 10,
 }
 var yyTok2 = [...]int{
 
-	2, 3, 4, 5,
+	2, 3, 4, 5, 6, 7,
 }
 var yyTok3 = [...]int{
 	0,
@@ -517,72 +635,133 @@ yydefault:
 
 	case 2:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:72
+		//line opening_hours.y:166
 		{
 			res := yylex.(*Lexer).parseResult
 			if res == nil {
-				yylex.(*Lexer).parseResult = yyDollar[1].weekly
+				yylex.(*Lexer).parseResult = yyDollar[1].monthly
 			}
 		}
 	case 3:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line opening_hours.y:80
+		//line opening_hours.y:174
 		{
-			yyVAL.weekly = mergeWeeklyTimeRanges(yyDollar[1].weekly, yyDollar[2].weekly)
+			yyVAL.monthly = mergeMonthly(yyDollar[1].monthly, yyDollar[2].monthly)
 		}
 	case 4:
 		yyDollar = yyS[yypt-0 : yypt+1]
-		//line opening_hours.y:84
+		//line opening_hours.y:178
 		{
-			yyVAL.weekly = makeWeekly()
+			yyVAL.monthly = make(Monthly)
 		}
 	case 5:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line opening_hours.y:86
+		//line opening_hours.y:180
 		{
-			{
-				yyVAL.weekly = yyDollar[2].weekly
-			}
+			yyVAL.monthly = yyDollar[2].monthly
 		}
 	case 6:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:90
+		//line opening_hours.y:185
 		{
-			yyVAL.weekly = appendWeeklyTimeRanges(makeWeekly(), wholeWeek, yyDollar[1].trs)
+			yyVAL.monthly = setWeekly(makeMonthly(any, []int{any}),
+				appendWeeklyTimeRanges(make(Weekly),
+					wholeWeek,
+					wholeDay))
 		}
 	case 7:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		//line opening_hours.y:93
+		yyDollar = yyS[yypt-5 : yypt+1]
+		//line opening_hours.y:193
 		{
-			yyVAL.weekly = appendWeeklyTimeRanges(makeWeekly(), yyDollar[1].nums, yyDollar[3].trs)
+			yyVAL.monthly = setWeekly(makeMonthly(yyDollar[3].num, yyDollar[1].nums), yyDollar[5].weekly)
 		}
 	case 8:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:96
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line opening_hours.y:198
 		{
-			yyVAL.weekly = appendWeeklyTimeRanges(makeWeekly(), wholeWeek, yyDollar[1].trs)
+			yyVAL.monthly = setWeekly(makeMonthly(any, yyDollar[1].nums), yyDollar[3].weekly)
 		}
 	case 9:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:99
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line opening_hours.y:203
 		{
-			yyVAL.trs = []TimeRange{NewTimeRange(0, 1440)}
+			yyVAL.monthly = setWeekly(makeMonthly(yyDollar[1].num, []int{any}), yyDollar[3].weekly)
 		}
 	case 10:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line opening_hours.y:208
+		{
+			yyVAL.monthly = setWeekly(makeMonthly(any, []int{any}), yyDollar[1].weekly)
+		}
+	case 11:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line opening_hours.y:103
+		//line opening_hours.y:215
 		{
 			yyVAL.nums = append(yyDollar[1].nums, yyDollar[2].nums...)
 		}
-	case 11:
+	case 12:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:109
+		//line opening_hours.y:221
 		{
 			yyVAL.nums = []int{yyDollar[1].num}
 		}
-	case 12:
+	case 13:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line opening_hours.y:114
+		//line opening_hours.y:224
+		{
+			if yyDollar[1].num > yyDollar[3].num {
+				yylex.Error(fmt.Sprintf("invalid days range: %d - %d\n", yyDollar[1].num, yyDollar[3].num))
+			}
+			yyVAL.nums = make([]int, 0)
+			for i := yyDollar[1].num; i <= yyDollar[3].num; i++ {
+				yyVAL.nums = append(yyVAL.nums, i)
+			}
+		}
+	case 14:
+		yyDollar = yyS[yypt-0 : yypt+1]
+		//line opening_hours.y:236
+		{
+			yyVAL.nums = []int{}
+		}
+	case 15:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line opening_hours.y:239
+		{
+			yyVAL.nums = yyDollar[2].nums
+		}
+	case 16:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line opening_hours.y:244
+		{
+			yyVAL.weekly = appendWeeklyTimeRanges(make(Weekly), yyDollar[1].nums, wholeDay)
+		}
+	case 17:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line opening_hours.y:246
+		{
+			yyVAL.weekly = appendWeeklyTimeRanges(make(Weekly), yyDollar[1].nums, yyDollar[3].trs)
+		}
+	case 18:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line opening_hours.y:248
+		{
+			yyVAL.weekly = appendWeeklyTimeRanges(make(Weekly), wholeWeek, yyDollar[1].trs)
+		}
+	case 19:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line opening_hours.y:252
+		{
+			yyVAL.nums = append(yyDollar[1].nums, yyDollar[2].nums...)
+		}
+	case 20:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line opening_hours.y:258
+		{
+			yyVAL.nums = []int{yyDollar[1].num}
+		}
+	case 21:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line opening_hours.y:263
 		{
 			if yyDollar[1].num > yyDollar[3].num {
 				yylex.Error(fmt.Sprintf("invalid weekdays range: %d - %d\n", yyDollar[1].num, yyDollar[3].num))
@@ -592,39 +771,39 @@ yydefault:
 				yyVAL.nums = append(yyVAL.nums, i)
 			}
 		}
-	case 13:
+	case 22:
 		yyDollar = yyS[yypt-0 : yypt+1]
-		//line opening_hours.y:126
+		//line opening_hours.y:275
 		{
 			yyVAL.nums = []int{}
 		}
-	case 14:
+	case 23:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line opening_hours.y:131
+		//line opening_hours.y:280
 		{
 			yyVAL.nums = yyDollar[2].nums
 		}
-	case 15:
+	case 24:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line opening_hours.y:136
+		//line opening_hours.y:285
 		{
 			yyVAL.trs = append(yyDollar[2].trs, yyDollar[1].tr)
 		}
-	case 16:
+	case 25:
 		yyDollar = yyS[yypt-0 : yypt+1]
-		//line opening_hours.y:139
+		//line opening_hours.y:288
 		{
 			yyVAL.trs = []TimeRange{}
 		}
-	case 17:
+	case 26:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line opening_hours.y:141
+		//line opening_hours.y:290
 		{
 			yyVAL.trs = yyDollar[2].trs
 		}
-	case 18:
+	case 27:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line opening_hours.y:145
+		//line opening_hours.y:294
 		{
 			ts := NewTimeRange(yyDollar[1].num, yyDollar[3].num)
 
@@ -633,9 +812,9 @@ yydefault:
 			}
 			yyVAL.tr = ts
 		}
-	case 19:
+	case 28:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line opening_hours.y:156
+		//line opening_hours.y:305
 		{
 			t := yyDollar[1].num + yyDollar[3].num
 			if t > 1440 { // > 24:00
@@ -643,87 +822,96 @@ yydefault:
 			}
 			yyVAL.num = t
 		}
-	case 20:
+	case 29:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:166
+		//line opening_hours.y:315
 		{
 			if yyDollar[1].num < 0 || yyDollar[1].num > 24 {
 				yylex.Error(fmt.Sprintf("invalid hour: %d\n", yyDollar[1].num))
 			}
 			yyVAL.num = yyDollar[1].num * 60
 		}
-	case 21:
+	case 30:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:175
+		//line opening_hours.y:324
 		{
 			if yyDollar[1].num < 0 || yyDollar[1].num > 59 {
 				yylex.Error(fmt.Sprintf("invalid minutes: %d\n", yyDollar[1].num))
 			}
 			yyVAL.num = yyDollar[1].num
 		}
-	case 22:
+	case 31:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line opening_hours.y:333
+		{
+			if yyDollar[1].num < 1 || yyDollar[1].num > 31 {
+				yylex.Error(fmt.Sprintf("invalid day: %d\n", yyDollar[1].num))
+			}
+			yyVAL.num = yyDollar[1].num
+		}
+	case 32:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line opening_hours.y:184
+		//line opening_hours.y:340
 		{
 			yyVAL.num = yyDollar[1].num*10 + yyDollar[2].num
 		}
-	case 23:
+	case 33:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:187
+		//line opening_hours.y:343
 		{
 			yyVAL.num = 0
 		}
-	case 24:
+	case 34:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:187
+		//line opening_hours.y:343
 		{
 			yyVAL.num = 1
 		}
-	case 25:
+	case 35:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:187
+		//line opening_hours.y:343
 		{
 			yyVAL.num = 2
 		}
-	case 26:
+	case 36:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:188
+		//line opening_hours.y:343
 		{
 			yyVAL.num = 3
 		}
-	case 27:
+	case 37:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:188
+		//line opening_hours.y:343
 		{
 			yyVAL.num = 4
 		}
-	case 28:
+	case 38:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:188
+		//line opening_hours.y:343
 		{
 			yyVAL.num = 5
 		}
-	case 29:
+	case 39:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:189
+		//line opening_hours.y:343
 		{
 			yyVAL.num = 6
 		}
-	case 30:
+	case 40:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:189
+		//line opening_hours.y:343
 		{
 			yyVAL.num = 7
 		}
-	case 31:
+	case 41:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:189
+		//line opening_hours.y:343
 		{
 			yyVAL.num = 8
 		}
-	case 32:
+	case 42:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line opening_hours.y:189
+		//line opening_hours.y:343
 		{
 			yyVAL.num = 9
 		}
