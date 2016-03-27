@@ -28,3 +28,11 @@ func main() {
 	fmt.Println(oh.Match(time.Now()))
 }
 ```
+## Examples
+
+Openhours           |Description
+--------------------|-----------
+24 Dec              |Any time on 24th of December
+01-05               |Any time from 1st till 5th of any month
+18:00-18:30         |Any day from 6PM till 6:30PM
+Sa,Su 10:00-22:00   |From 10AM till 10PM on Saturday and Sunday
