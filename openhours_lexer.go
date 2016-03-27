@@ -1,7 +1,6 @@
-package main
+package openhours
 
 import (
-	"bytes"
 	"fmt"
 )
 import (
@@ -2206,13 +2205,11 @@ OUTER0:
 			}
 		case 1:
 			{
-				fmt.Printf("parsing month: %s\n", yylex.Text())
 				lval.num, _ = months[yylex.Text()]
 				return MONTH
 			}
 		case 2:
 			{
-				fmt.Printf("parsing weekday: %s\n", yylex.Text())
 				lval.num, _ = weekdays[yylex.Text()]
 				return WEEKDAY
 			}
@@ -2222,7 +2219,6 @@ OUTER0:
 			}
 		case 4:
 			{
-				fmt.Printf("parsing symbol: %s\n", yylex.Text())
 				return int(yylex.Text()[0])
 			}
 		default:
@@ -2245,17 +2241,4 @@ func (yylex *Lexer) Error(e string) {
 		yylex.parseResult = make([]error, 0)
 	}
 	yylex.parseResult = append(yylex.parseResult.([]error), fmt.Errorf("%d:%d %v", yylex.Line(), yylex.Column(), e))
-}
-
-func main() {
-	s := "Mo-Tu,Sa 11:00-12:00,13:00-14:00;31 05:00-06:00"
-	fmt.Println(s)
-	lex := NewLexer(bytes.NewBufferString(s))
-	yyParse(lex)
-	switch x := lex.parseResult.(type) {
-	case []error:
-		fmt.Println(x)
-	case Monthly:
-		fmt.Println("result:", x)
-	}
 }
