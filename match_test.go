@@ -34,6 +34,15 @@ func compileSuccess(s string, a *assert.Assertions) *OpenHours {
 func TestMatch(t *testing.T) {
 	assert := assert.New(t)
 
+	// 24/7
+	{
+		oh := compileSuccess("24/7", assert)
+
+		assert.True(oh.Match(time.Now()))
+		assert.True(oh.Match(date("01-01-1970")))
+		assert.True(oh.Match(date("22-11-2028")))
+	}
+
 	//weekdays only
 	for wd, i := range weekdays {
 		t := sunday().AddDate(0, 0, i)
