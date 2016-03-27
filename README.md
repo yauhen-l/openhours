@@ -1,4 +1,4 @@
-# openhours
+# openhours [![Build Status](https://travis-ci.org/yauhen-l/openhours.png?branch=master)](https://travis-ci.org/yauhen-l/openhours)
 golang implementation of opening hours (inspired by OpenStreetMap opening hours: http://wiki.openstreetmap.org/wiki/Key:opening_hours)
 
 This Go library let you define time intervals in human-readable form and then check if specified time matches this interval.
