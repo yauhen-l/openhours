@@ -29,7 +29,14 @@ func main() {
 }
 ```
 ## Examples
+OpenHours pattern:
+```
+OpenHours = (days(,days)*)? (MMM)? (Wds(,Wds)*)? (timespan(,timespans)*)?
 
+days = day | day-day       #Days of month
+Wds = Wd | Wd-Wd           #Weekdays
+timespan = hh:mm-hh:mm     #Day time range
+```
 Openhours           |Description
 --------------------|-----------
 24/7                |Matches everything

@@ -1,3 +1,6 @@
+// Package oenhours provides functions for parsing time intervals
+// defined in human-readable form and check whether specific time matches these intervals
+
 //go:generate nex -o openhours_lexer.go -e openhours.nex
 //go:generate go tool yacc -o openhours_parser.go openhours.y
 package openhours
@@ -13,15 +16,18 @@ var wholeWeek = []int{-1}
 var wholeDay = []TimeRange{NewTimeRange(0, 1440)}
 var anyTime = appendWeeklyTimeRanges(make(Weekly), wholeWeek, wholeDay)
 
+// OpenHours is a main top-level struct to work with
 type OpenHours struct {
 	data       Monthly // Month -> Day -> Weekday -> Hours
 	definition string
 }
 
+// Match returns true if provided time matches current OpenHours
 func (oh *OpenHours) Match(t time.Time) bool {
 	return oh.data.Match(t)
 }
 
+// Definition returns initial open hours string
 func (oh *OpenHours) Definition() string {
 	return oh.definition
 }
@@ -132,6 +138,8 @@ func mergeWeeklyTimeRanges(w1, w2 Weekly) Weekly {
 	return w1
 }
 
+// CompileOpenHours parses open hours string
+// It returns OpenHours object or list of compilation errors
 func CompileOpenHours(s string) (*OpenHours, []error) {
 	lex := NewLexer(bytes.NewBufferString(s))
 	yyParse(lex)
