@@ -49,9 +49,9 @@ var yyStatenames = [...]string{}
 
 const yyEofCode = 1
 const yyErrCode = 2
-const yyMaxDepth = 200
+const yyInitialStackSize = 16
 
-//line openhours.y:223
+//line openhours.y:225
 
 //line yacctab:1
 var yyExca = [...]int{
@@ -59,62 +59,64 @@ var yyExca = [...]int{
 	1, -1,
 	-2, 0,
 	-1, 14,
-	9, 31,
-	-2, 33,
+	9, 33,
+	-2, 35,
 }
 
-const yyNprod = 45
+const yyNprod = 47
 const yyPrivate = 57344
 
 var yyTokenNames []string
 var yyStates []string
 
-const yyLast = 100
+const yyLast = 120
 
 var yyAct = [...]int{
 
-	7, 16, 11, 48, 14, 10, 9, 5, 15, 6,
-	4, 17, 2, 40, 38, 30, 19, 20, 21, 22,
-	23, 24, 25, 26, 27, 28, 34, 44, 42, 43,
-	41, 36, 47, 49, 14, 60, 35, 32, 51, 53,
-	51, 52, 50, 45, 57, 54, 55, 31, 59, 56,
-	15, 1, 29, 3, 15, 46, 39, 13, 33, 8,
-	37, 61, 19, 20, 21, 22, 23, 24, 25, 26,
-	27, 28, 15, 12, 58, 18, 0, 0, 0, 0,
+	7, 48, 14, 2, 10, 16, 11, 5, 40, 38,
+	34, 9, 15, 6, 4, 61, 17, 30, 44, 42,
+	19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+	41, 36, 47, 49, 43, 62, 51, 35, 51, 32,
+	52, 31, 50, 53, 56, 55, 59, 14, 57, 60,
+	54, 15, 45, 1, 29, 3, 15, 6, 4, 39,
+	13, 33, 8, 63, 19, 20, 21, 22, 23, 24,
+	25, 26, 27, 28, 15, 46, 37, 12, 58, 18,
+	0, 0, 19, 20, 21, 22, 23, 24, 25, 26,
+	27, 28, 15, 0, 0, 0, 0, 0, 0, 0,
 	19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
 	19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
 }
 var yyPact = [...]int{
 
-	4, -1000, -1000, 5, -1000, 40, 30, -1000, 15, 29,
-	-1000, 23, 3, 2, -1000, 22, 20, 78, 18, -1000,
+	52, -1000, -1000, 7, -1000, 34, 32, -1000, -1, 30,
+	-1000, 23, -2, -3, -1000, 22, 11, 98, 9, -1000,
 	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	4, 50, 68, -1000, 78, 78, 78, -1000, 46, -1000,
-	78, 45, 78, -1000, 78, -1000, 28, -1000, -1000, -1000,
+	-1000, 70, 88, -1000, 98, 98, 98, -1000, 47, -1000,
+	98, 40, 98, -1000, 98, 8, 28, -1000, -1000, -1000,
 	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	68, -1000,
+	-1000, -1000, 88, -1000,
 }
 var yyPgo = [...]int{
 
-	0, 1, 75, 74, 2, 11, 3, 73, 6, 60,
-	7, 59, 58, 57, 5, 56, 53, 12, 52, 0,
-	51,
+	0, 5, 79, 78, 6, 16, 1, 77, 11, 76,
+	7, 62, 61, 60, 4, 59, 55, 3, 54, 0,
+	53, 52,
 }
 var yyR1 = [...]int{
 
 	0, 20, 20, 17, 18, 18, 16, 16, 16, 16,
 	16, 16, 16, 10, 11, 11, 12, 12, 19, 19,
-	19, 8, 7, 7, 9, 9, 14, 15, 15, 13,
-	1, 2, 3, 4, 6, 5, 5, 5, 5, 5,
-	5, 5, 5, 5, 5,
+	19, 8, 7, 7, 9, 9, 21, 21, 14, 15,
+	15, 13, 1, 2, 3, 4, 6, 5, 5, 5,
+	5, 5, 5, 5, 5, 5, 5,
 }
 var yyR2 = [...]int{
 
-	0, 0, 1, 2, 0, 2, 1, 1, 3, 5,
+	0, 0, 1, 2, 0, 3, 1, 1, 3, 5,
 	3, 3, 1, 2, 1, 3, 0, 2, 1, 3,
-	1, 2, 1, 3, 0, 2, 2, 0, 2, 3,
-	3, 1, 1, 1, 2, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1,
+	1, 2, 1, 3, 0, 2, 0, 2, 2, 0,
+	2, 3, 3, 1, 1, 1, 2, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1,
 }
 var yyChk = [...]int{
 
@@ -122,19 +124,19 @@ var yyChk = [...]int{
 	-14, -4, -7, -13, -6, 4, -1, -5, -2, 12,
 	13, 14, 15, 16, 17, 18, 19, 20, 21, -18,
 	10, 7, 7, -12, 11, 7, 8, -9, 11, -15,
-	11, 8, 8, -5, 9, -17, 5, -19, -6, -19,
+	11, 8, 8, -5, 9, -21, 5, -19, -6, -19,
 	-10, -6, -14, -4, -8, -14, 4, -1, -3, -6,
-	7, -19,
+	-17, 7, 7, -19,
 }
 var yyDef = [...]int{
 
 	1, -2, 2, 4, 6, 7, 0, 12, 16, 18,
-	20, 14, 24, 27, -2, 22, 0, 0, 0, 35,
-	36, 37, 38, 39, 40, 41, 42, 43, 44, 3,
-	0, 0, 0, 13, 0, 0, 0, 21, 0, 26,
-	0, 0, 0, 34, 0, 5, 8, 10, 31, 11,
-	17, 33, 19, 15, 25, 28, 23, 29, 30, 32,
-	0, 9,
+	20, 14, 24, 29, -2, 22, 0, 0, 0, 37,
+	38, 39, 40, 41, 42, 43, 44, 45, 46, 3,
+	26, 0, 0, 13, 0, 0, 0, 21, 0, 28,
+	0, 0, 0, 36, 0, 0, 8, 10, 33, 11,
+	17, 35, 19, 15, 25, 30, 23, 31, 32, 34,
+	5, 27, 0, 9,
 }
 var yyTok1 = [...]int{
 
@@ -179,18 +181,17 @@ type yyParser interface {
 }
 
 type yyParserImpl struct {
-	lookahead func() int
+	lval  yySymType
+	stack [yyInitialStackSize]yySymType
+	char  int
 }
 
 func (p *yyParserImpl) Lookahead() int {
-	return p.lookahead()
+	return p.char
 }
 
 func yyNewParser() yyParser {
-	p := &yyParserImpl{
-		lookahead: func() int { return -1 },
-	}
-	return p
+	return &yyParserImpl{}
 }
 
 const yyFlag = -1000
@@ -318,22 +319,20 @@ func yyParse(yylex yyLexer) int {
 
 func (yyrcvr *yyParserImpl) Parse(yylex yyLexer) int {
 	var yyn int
-	var yylval yySymType
 	var yyVAL yySymType
 	var yyDollar []yySymType
 	_ = yyDollar // silence set and not used
-	yyS := make([]yySymType, yyMaxDepth)
+	yyS := yyrcvr.stack[:]
 
 	Nerrs := 0   /* number of errors */
 	Errflag := 0 /* error recovery flag */
 	yystate := 0
-	yychar := -1
-	yytoken := -1 // yychar translated into internal numbering
-	yyrcvr.lookahead = func() int { return yychar }
+	yyrcvr.char = -1
+	yytoken := -1 // yyrcvr.char translated into internal numbering
 	defer func() {
 		// Make sure we report no lookahead when not parsing.
 		yystate = -1
-		yychar = -1
+		yyrcvr.char = -1
 		yytoken = -1
 	}()
 	yyp := -1
@@ -365,8 +364,8 @@ yynewstate:
 	if yyn <= yyFlag {
 		goto yydefault /* simple state */
 	}
-	if yychar < 0 {
-		yychar, yytoken = yylex1(yylex, &yylval)
+	if yyrcvr.char < 0 {
+		yyrcvr.char, yytoken = yylex1(yylex, &yyrcvr.lval)
 	}
 	yyn += yytoken
 	if yyn < 0 || yyn >= yyLast {
@@ -374,9 +373,9 @@ yynewstate:
 	}
 	yyn = yyAct[yyn]
 	if yyChk[yyn] == yytoken { /* valid shift */
-		yychar = -1
+		yyrcvr.char = -1
 		yytoken = -1
-		yyVAL = yylval
+		yyVAL = yyrcvr.lval
 		yystate = yyn
 		if Errflag > 0 {
 			Errflag--
@@ -388,8 +387,8 @@ yydefault:
 	/* default state action */
 	yyn = yyDef[yystate]
 	if yyn == -2 {
-		if yychar < 0 {
-			yychar, yytoken = yylex1(yylex, &yylval)
+		if yyrcvr.char < 0 {
+			yyrcvr.char, yytoken = yylex1(yylex, &yyrcvr.lval)
 		}
 
 		/* look through exception table */
@@ -452,7 +451,7 @@ yydefault:
 			if yytoken == yyEofCode {
 				goto ret1
 			}
-			yychar = -1
+			yyrcvr.char = -1
 			yytoken = -1
 			goto yynewstate /* try again in the same state */
 		}
@@ -515,10 +514,10 @@ yydefault:
 			yyVAL.monthly = make(Monthly)
 		}
 	case 5:
-		yyDollar = yyS[yypt-2 : yypt+1]
+		yyDollar = yyS[yypt-3 : yypt+1]
 		//line openhours.y:50
 		{
-			yyVAL.monthly = yyDollar[2].monthly
+			yyVAL.monthly = yyDollar[3].monthly
 		}
 	case 6:
 		yyDollar = yyS[yypt-1 : yypt+1]
@@ -652,27 +651,27 @@ yydefault:
 		{
 			yyVAL.nums = yyDollar[2].nums
 		}
-	case 26:
+	case 28:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line openhours.y:162
+		//line openhours.y:164
 		{
 			yyVAL.trs = append(yyDollar[2].trs, yyDollar[1].tr)
 		}
-	case 27:
+	case 29:
 		yyDollar = yyS[yypt-0 : yypt+1]
-		//line openhours.y:165
+		//line openhours.y:167
 		{
 			yyVAL.trs = []TimeRange{}
 		}
-	case 28:
+	case 30:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line openhours.y:167
+		//line openhours.y:169
 		{
 			yyVAL.trs = yyDollar[2].trs
 		}
-	case 29:
+	case 31:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line openhours.y:171
+		//line openhours.y:173
 		{
 			ts := NewTimeRange(yyDollar[1].num, yyDollar[3].num)
 
@@ -681,9 +680,9 @@ yydefault:
 			}
 			yyVAL.tr = ts
 		}
-	case 30:
+	case 32:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line openhours.y:182
+		//line openhours.y:184
 		{
 			t := yyDollar[1].num + yyDollar[3].num
 			if t > 1440 { // > 24:00
@@ -691,96 +690,96 @@ yydefault:
 			}
 			yyVAL.num = t
 		}
-	case 31:
+	case 33:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:192
+		//line openhours.y:194
 		{
 			if yyDollar[1].num < 0 || yyDollar[1].num > 24 {
 				yylex.Error(fmt.Sprintf("invalid hour: %d\n", yyDollar[1].num))
 			}
 			yyVAL.num = yyDollar[1].num * 60
 		}
-	case 32:
+	case 34:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:201
+		//line openhours.y:203
 		{
 			if yyDollar[1].num < 0 || yyDollar[1].num > 59 {
 				yylex.Error(fmt.Sprintf("invalid minutes: %d\n", yyDollar[1].num))
 			}
 			yyVAL.num = yyDollar[1].num
 		}
-	case 33:
+	case 35:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:210
+		//line openhours.y:212
 		{
 			if yyDollar[1].num < 1 || yyDollar[1].num > 31 {
 				yylex.Error(fmt.Sprintf("invalid day: %d\n", yyDollar[1].num))
 			}
 			yyVAL.num = yyDollar[1].num
 		}
-	case 34:
+	case 36:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line openhours.y:217
+		//line openhours.y:219
 		{
 			yyVAL.num = yyDollar[1].num*10 + yyDollar[2].num
 		}
-	case 35:
+	case 37:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:220
+		//line openhours.y:222
 		{
 			yyVAL.num = 0
 		}
-	case 36:
+	case 38:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:220
+		//line openhours.y:222
 		{
 			yyVAL.num = 1
 		}
-	case 37:
+	case 39:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:220
+		//line openhours.y:222
 		{
 			yyVAL.num = 2
 		}
-	case 38:
+	case 40:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:220
+		//line openhours.y:222
 		{
 			yyVAL.num = 3
 		}
-	case 39:
+	case 41:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:220
+		//line openhours.y:222
 		{
 			yyVAL.num = 4
 		}
-	case 40:
+	case 42:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:220
+		//line openhours.y:222
 		{
 			yyVAL.num = 5
 		}
-	case 41:
+	case 43:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:220
+		//line openhours.y:222
 		{
 			yyVAL.num = 6
 		}
-	case 42:
+	case 44:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:220
+		//line openhours.y:222
 		{
 			yyVAL.num = 7
 		}
-	case 43:
+	case 45:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:220
+		//line openhours.y:222
 		{
 			yyVAL.num = 8
 		}
-	case 44:
+	case 46:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line openhours.y:220
+		//line openhours.y:222
 		{
 			yyVAL.num = 9
 		}

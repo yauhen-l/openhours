@@ -47,7 +47,7 @@ selectors:      selector selector_seq { $$ = mergeMonthly($1, $2) }
 selector_seq:  /* empty */
                 { $$ = make(Monthly) }
         |
-                ';' selectors { $$ = $2 }
+                ';' opt_sep selectors { $$ = $3 }
         ;
 
 
@@ -158,6 +158,8 @@ weekdays_seq:    /* empty */
                     $$ = $2
                 }
         ;
+
+opt_sep: /* empty */ | opt_sep SEP ;
 
 timespans:      timespan timespans_seq  { $$ = append($2, $1) }
         ;

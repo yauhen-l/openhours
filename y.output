@@ -127,19 +127,19 @@ state 12
 
 state 13
 	timespans:  timespan.timespans_seq 
-	timespans_seq: .    (27)
+	timespans_seq: .    (29)
 
 	','  shift 40
-	.  reduce 27 (src line 165)
+	.  reduce 29 (src line 167)
 
 	timespans_seq  goto 39
 
 state 14
-	hour:  NUM.    (31)
-	day:  NUM.    (33)
+	hour:  NUM.    (33)
+	day:  NUM.    (35)
 
-	':'  reduce 31 (src line 191)
-	.  reduce 33 (src line 209)
+	':'  reduce 33 (src line 193)
+	.  reduce 35 (src line 211)
 
 
 state 15
@@ -182,63 +182,63 @@ state 18
 
 
 state 19
-	DIGIT:  '0'.    (35)
+	DIGIT:  '0'.    (37)
 
-	.  reduce 35 (src line 220)
+	.  reduce 37 (src line 222)
 
 
 state 20
-	DIGIT:  '1'.    (36)
+	DIGIT:  '1'.    (38)
 
-	.  reduce 36 (src line 220)
+	.  reduce 38 (src line 222)
 
 
 state 21
-	DIGIT:  '2'.    (37)
+	DIGIT:  '2'.    (39)
 
-	.  reduce 37 (src line 220)
+	.  reduce 39 (src line 222)
 
 
 state 22
-	DIGIT:  '3'.    (38)
+	DIGIT:  '3'.    (40)
 
-	.  reduce 38 (src line 220)
+	.  reduce 40 (src line 222)
 
 
 state 23
-	DIGIT:  '4'.    (39)
+	DIGIT:  '4'.    (41)
 
-	.  reduce 39 (src line 220)
+	.  reduce 41 (src line 222)
 
 
 state 24
-	DIGIT:  '5'.    (40)
+	DIGIT:  '5'.    (42)
 
-	.  reduce 40 (src line 220)
+	.  reduce 42 (src line 222)
 
 
 state 25
-	DIGIT:  '6'.    (41)
+	DIGIT:  '6'.    (43)
 
-	.  reduce 41 (src line 220)
+	.  reduce 43 (src line 222)
 
 
 state 26
-	DIGIT:  '7'.    (42)
+	DIGIT:  '7'.    (44)
 
-	.  reduce 42 (src line 220)
+	.  reduce 44 (src line 222)
 
 
 state 27
-	DIGIT:  '8'.    (43)
+	DIGIT:  '8'.    (45)
 
-	.  reduce 43 (src line 220)
+	.  reduce 45 (src line 222)
 
 
 state 28
-	DIGIT:  '9'.    (44)
+	DIGIT:  '9'.    (46)
 
-	.  reduce 44 (src line 220)
+	.  reduce 46 (src line 222)
 
 
 state 29
@@ -248,37 +248,12 @@ state 29
 
 
 state 30
-	selector_seq:  ';'.selectors 
+	selector_seq:  ';'.opt_sep selectors 
+	opt_sep: .    (26)
 
-	WEEKDAY  shift 15
-	MONTH  shift 6
-	ALWAYS  shift 4
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
+	.  reduce 26 (src line 162)
 
-	time  goto 16
-	hour  goto 18
-	day  goto 11
-	DIGIT  goto 17
-	NUM  goto 14
-	ws  goto 12
-	weekdays  goto 9
-	days  goto 5
-	ds  goto 8
-	timespan  goto 13
-	timespans  goto 10
-	selector  goto 3
-	selectors  goto 45
-	small_range_selector  goto 7
+	opt_sep  goto 45
 
 state 31
 	selector:  days SEP.MONTH 
@@ -419,9 +394,9 @@ state 38
 	weekdays  goto 54
 
 state 39
-	timespans:  timespan timespans_seq.    (26)
+	timespans:  timespan timespans_seq.    (28)
 
-	.  reduce 26 (src line 162)
+	.  reduce 28 (src line 164)
 
 
 state 40
@@ -474,9 +449,9 @@ state 42
 	NUM  goto 48
 
 state 43
-	NUM:  DIGIT DIGIT.    (34)
+	NUM:  DIGIT DIGIT.    (36)
 
-	.  reduce 34 (src line 216)
+	.  reduce 36 (src line 218)
 
 
 state 44
@@ -499,16 +474,45 @@ state 44
 	NUM  goto 59
 
 state 45
-	selector_seq:  ';' selectors.    (5)
+	selector_seq:  ';' opt_sep.selectors 
+	opt_sep:  opt_sep.SEP 
 
-	.  reduce 5 (src line 49)
+	WEEKDAY  shift 15
+	MONTH  shift 6
+	ALWAYS  shift 4
+	SEP  shift 61
+	'0'  shift 19
+	'1'  shift 20
+	'2'  shift 21
+	'3'  shift 22
+	'4'  shift 23
+	'5'  shift 24
+	'6'  shift 25
+	'7'  shift 26
+	'8'  shift 27
+	'9'  shift 28
+	.  error
 
+	time  goto 16
+	hour  goto 18
+	day  goto 11
+	DIGIT  goto 17
+	NUM  goto 14
+	ws  goto 12
+	weekdays  goto 9
+	days  goto 5
+	ds  goto 8
+	timespan  goto 13
+	timespans  goto 10
+	selector  goto 3
+	selectors  goto 60
+	small_range_selector  goto 7
 
 state 46
 	selector:  days SEP MONTH.    (8)
 	selector:  days SEP MONTH.SEP small_range_selector 
 
-	SEP  shift 60
+	SEP  shift 62
 	.  reduce 8 (src line 63)
 
 
@@ -519,9 +523,9 @@ state 47
 
 
 state 48
-	hour:  NUM.    (31)
+	hour:  NUM.    (33)
 
-	.  reduce 31 (src line 191)
+	.  reduce 33 (src line 193)
 
 
 state 49
@@ -537,9 +541,9 @@ state 50
 
 
 state 51
-	day:  NUM.    (33)
+	day:  NUM.    (35)
 
-	.  reduce 33 (src line 209)
+	.  reduce 35 (src line 211)
 
 
 state 52
@@ -561,9 +565,9 @@ state 54
 
 
 state 55
-	timespans_seq:  ',' timespans.    (28)
+	timespans_seq:  ',' timespans.    (30)
 
-	.  reduce 28 (src line 166)
+	.  reduce 30 (src line 168)
 
 
 state 56
@@ -573,24 +577,36 @@ state 56
 
 
 state 57
-	timespan:  time '-' time.    (29)
+	timespan:  time '-' time.    (31)
 
-	.  reduce 29 (src line 170)
+	.  reduce 31 (src line 172)
 
 
 state 58
-	time:  hour ':' minute.    (30)
+	time:  hour ':' minute.    (32)
 
-	.  reduce 30 (src line 181)
+	.  reduce 32 (src line 183)
 
 
 state 59
-	minute:  NUM.    (32)
+	minute:  NUM.    (34)
 
-	.  reduce 32 (src line 200)
+	.  reduce 34 (src line 202)
 
 
 state 60
+	selector_seq:  ';' opt_sep selectors.    (5)
+
+	.  reduce 5 (src line 49)
+
+
+state 61
+	opt_sep:  opt_sep SEP.    (27)
+
+	.  reduce 27 (src line 162)
+
+
+state 62
 	selector:  days SEP MONTH SEP.small_range_selector 
 
 	WEEKDAY  shift 15
@@ -614,23 +630,23 @@ state 60
 	weekdays  goto 9
 	timespan  goto 13
 	timespans  goto 10
-	small_range_selector  goto 61
+	small_range_selector  goto 63
 
-state 61
+state 63
 	selector:  days SEP MONTH SEP small_range_selector.    (9)
 
 	.  reduce 9 (src line 68)
 
 
-21 terminals, 21 nonterminals
-45 grammar rules, 62/2000 states
+21 terminals, 22 nonterminals
+47 grammar rules, 64/8000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
-70 working sets used
-memory: parser 114/30000
+71 working sets used
+memory: parser 115/120000
 4 extra closures
-144 shift entries, 2 exceptions
-36 goto entries
+145 shift entries, 2 exceptions
+37 goto entries
 54 entries saved by goto default
-Optimizer space used: output 100/30000
-100 table entries, 4 zero
-maximum spread: 21, maximum offset: 60
+Optimizer space used: output 120/120000
+120 table entries, 9 zero
+maximum spread: 21, maximum offset: 62

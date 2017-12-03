@@ -2,7 +2,7 @@
 // defined in human-readable form and check whether specific time matches these intervals
 
 //go:generate nex -o openhours_lexer.go -e openhours.nex
-//go:generate go tool yacc -o openhours_parser.go openhours.y
+//go:generate goyacc -o openhours_parser.go openhours.y
 package openhours
 
 import (

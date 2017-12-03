@@ -7,7 +7,7 @@
 												lval.num,_ = weekdays[yylex.Text()]
 												return WEEKDAY
 											 }
-/ /                    { return SEP } 											 
+/ |\t/                 { return SEP }
 /./                    {
 											  return int(yylex.Text()[0])
 											 }

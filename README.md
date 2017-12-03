@@ -7,6 +7,8 @@ This Go library let you define time intervals in human-readable form and then ch
 
 Run `go get github.com/yauhen-l/openhours`
 
+Supports Golang 1.7+ (due to `t.Run` usages in tests, but should work for earlier versions too)
+
 ## Usage
 
 ```go
@@ -29,7 +31,7 @@ func main() {
 }
 ```
 ## Examples
-OpenHours pattern:
+OpenHours simplified pattern:
 ```
 OpenHours = (days(,days)*)? (MMM)? (Wds(,Wds)*)? (timespan(,timespans)*)?
 
@@ -44,3 +46,19 @@ Openhours           |Description
 01-05               |Any time from 1st till 5th of any month
 18:00-18:30         |Any day from 6PM till 6:30PM
 Sa,Su 10:00-22:00   |From 10AM till 10PM on Saturday and Sunday
+Mo; Tu 9:00-15:00   |Any time on Monday and from 9AM till 3PM on Tuesday
+
+## Contribution
+
+If want to extend syntax then you need to install few more packages:
+```
+// Lexer
+go get github.com/blynn/nex
+// Parser
+go get golang.org/x/tools/cmd/goyacc
+```
+
+To verify changes:
+```
+go generate && go test -v
+```
