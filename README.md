@@ -3,6 +3,8 @@ golang implementation of opening hours (inspired by OpenStreetMap opening hours:
 
 This Go library let you define time intervals in human-readable form and then check if specified time matches this interval.
 
+This library uses [dep](https://github.com/golang/dep) to manage dependencies.
+
 ## Install
 
 Run `go get github.com/yauhen-l/openhours`
