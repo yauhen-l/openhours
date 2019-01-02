@@ -57,7 +57,7 @@ If want to extend syntax then you need to install few more packages:
 // Lexer
 go get github.com/blynn/nex
 // Parser
-go get golang.org/x/tools/cmd/goyacc
+go get github.com/cznic/goyacc
 ```
 
 To verify changes:
