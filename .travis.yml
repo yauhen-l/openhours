@@ -1,14 +1,9 @@
 language: go
-
 go:
   - 1.7
   - 1.11
   - tip
-
-install:
-  - go get github.com/stretchr/testify/assert
-  - go get github.com/stretchr/testify/require
-  - go build .
-
+install: true
 script:
-  - go test -v
+  - env GO111MODULE=on go build .
+  - env GO111MODULE=on go test -v
