@@ -7,8 +7,6 @@ This Go library let you define time intervals in human-readable form and then ch
 
 Run `go get github.com/yauhen-l/openhours`
 
-Supports Golang 1.7+ (due to `t.Run` usages in tests, but should work for earlier versions too)
-
 ## Usage
 
 ```go
