@@ -15,7 +15,7 @@ package main
 import (
     "fmt"
     "time"
-    
+
     "github.com/yauhen-l/openhours"
 )
 
@@ -25,9 +25,54 @@ func main() {
 	  fmt.Printf("%v\n", errs)
 	  return
 	}
-	fmt.Println(oh.Match(time.Now()))
+
+	// Simple check if currently open
+	fmt.Println("Currently open:", oh.Match(time.Now()))
+
+	// Get detailed status information
+	isOpen, nextChange, duration := oh.MatchExt(time.Now())
+	if isOpen {
+		fmt.Printf("Open! Will close at %v (in %v)\n",
+			nextChange.Format("15:04"), duration)
+	} else {
+		if nextChange.IsZero() {
+			fmt.Println("Closed (never opens)")
+		} else {
+			fmt.Printf("Closed. Will open at %v (in %v)\n",
+				nextChange.Format("Mon 15:04"), duration)
+		}
+	}
 }
 ```
+
+## API Reference
+
+### `Match(time.Time) bool`
+Returns `true` if the location is open at the given time, `false` otherwise.
+
+### `MatchExt(time.Time) (isOpen bool, nextChange time.Time, duration time.Duration)`
+Returns detailed status information:
+- `isOpen`: whether currently open
+- `nextChange`: when status will next change (zero time if never changes, e.g., for "24/7")
+- `duration`: how long until the status change
+
+```go
+// Business hours example
+oh, _ := openhours.CompileOpenHours("Mo-Fr 09:00-17:00")
+
+// Tuesday 2 PM
+isOpen, nextChange, duration := oh.MatchExt(time.Date(2023, 6, 13, 14, 0, 0, 0, time.UTC))
+// isOpen: true
+// nextChange: Tuesday 17:00
+// duration: 3h0m0s
+
+// Tuesday 8 PM
+isOpen, nextChange, duration = oh.MatchExt(time.Date(2023, 6, 13, 20, 0, 0, 0, time.UTC))
+// isOpen: false
+// nextChange: Wednesday 09:00
+// duration: 13h0m0s
+```
+
 ## Examples
 OpenHours simplified pattern:
 ```

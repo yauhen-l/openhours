@@ -11,8 +11,14 @@ type Matcher interface {
 	Match(t time.Time) bool
 }
 
+// ExtendedMatcher provides detailed status information
+type ExtendedMatcher interface {
+	Matcher
+	MatchExt(t time.Time) (isOpen bool, nextChange time.Time, duration time.Duration)
+}
+
 // Parse parses an opening hours string and returns a matcher or errors
-func Parse(s string) (Matcher, []error) {
+func Parse(s string) (ExtendedMatcher, []error) {
 	lex := NewLexer(bytes.NewBufferString(s))
 	yyParse(lex)
 	switch x := lex.parseResult.(type) {
