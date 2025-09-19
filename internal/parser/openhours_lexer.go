@@ -1,4 +1,4 @@
-package openhours
+package parser
 
 import (
 	"fmt"

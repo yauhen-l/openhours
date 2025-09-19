@@ -1,5 +1,5 @@
 %{
-package openhours
+package parser
 
 import "fmt"
 %}
@@ -7,10 +7,10 @@ import "fmt"
 %union {
   num int
   nums []int
-  tr TimeRange
-  trs []TimeRange
-  weekly Weekly
-  monthly Monthly
+  tr timeRange
+  trs []timeRange
+  weekly weekly
+  monthly monthly
 }
 
 %type    <num>            time hour minute day DIGIT NUM
@@ -45,7 +45,7 @@ selectors:      selector selector_seq { $$ = mergeMonthly($1, $2) }
         ;
 
 selector_seq:  /* empty */
-                { $$ = make(Monthly) }
+                { $$ = make(monthly) }
         |
                 ';' opt_sep selectors { $$ = $3 }
         ;
@@ -118,11 +118,11 @@ more_days:      /* empty */
 
 small_range_selector:
                 weekdays
-                {$$ = appendWeeklyTimeRanges(make(Weekly), $1, wholeDay)}
+                {$$ = appendWeeklyTimeRanges(make(weekly), $1, wholeDay)}
         |        weekdays SEP timespans
-                {$$ = appendWeeklyTimeRanges(make(Weekly), $1, $3)}
+                {$$ = appendWeeklyTimeRanges(make(weekly), $1, $3)}
         |        timespans
-                {$$ = appendWeeklyTimeRanges(make(Weekly), wholeWeek, $1)}
+                {$$ = appendWeeklyTimeRanges(make(weekly), wholeWeek, $1)}
         ;
 
 weekdays:       ws  weekdays_seq
@@ -164,14 +164,14 @@ opt_sep: /* empty */ | opt_sep SEP ;
 timespans:      timespan timespans_seq  { $$ = append($2, $1) }
         ;
 
-timespans_seq:  /* empty */   { $$ = []TimeRange{} }
+timespans_seq:  /* empty */   { $$ = []timeRange{} }
         |
                 ',' timespans { $$ = $2 }
         ;
 
 timespan:        time '-' time
                 {
-                    ts := NewTimeRange($1, $3)
+                    ts := newTimeRange($1, $3)
 
                     if ts.Start >= ts.End {
                             yylex.Error(fmt.Sprintf("invalid timerange: %v\n", ts))
