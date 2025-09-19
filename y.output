@@ -1,652 +1,874 @@
+state 0 //
 
-state 0
-	$accept: .root $end 
-	root: .    (1)
+    0 $accept: . root
+    1 root: .  [$end]
 
-	WEEKDAY  shift 15
-	MONTH  shift 6
-	ALWAYS  shift 4
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  reduce 1 (src line 33)
+    $end     reduce using rule 1 (root)
+    '0'      shift, and goto state 19
+    '1'      shift, and goto state 20
+    '2'      shift, and goto state 21
+    '3'      shift, and goto state 22
+    '4'      shift, and goto state 23
+    '5'      shift, and goto state 24
+    '6'      shift, and goto state 25
+    '7'      shift, and goto state 26
+    '8'      shift, and goto state 27
+    '9'      shift, and goto state 28
+    ALWAYS   shift, and goto state 4
+    MONTH    shift, and goto state 6
+    WEEKDAY  shift, and goto state 13
 
-	time  goto 16
-	hour  goto 18
-	day  goto 11
-	DIGIT  goto 17
-	NUM  goto 14
-	ws  goto 12
-	weekdays  goto 9
-	days  goto 5
-	ds  goto 8
-	timespan  goto 13
-	timespans  goto 10
-	selector  goto 3
-	selectors  goto 2
-	small_range_selector  goto 7
-	root  goto 1
+    DIGIT                 goto state 18
+    NUM                   goto state 17
+    day                   goto state 9
+    days                  goto state 5
+    ds                    goto state 8
+    hour                  goto state 16
+    root                  goto state 1
+    selector              goto state 3
+    selectors             goto state 2
+    small_range_selector  goto state 7
+    time                  goto state 15
+    timespan              goto state 14
+    timespans             goto state 11
+    weekdays              goto state 10
+    ws                    goto state 12
 
-state 1
-	$accept:  root.$end 
+state 1 // [$end]
 
-	$end  accept
-	.  error
+    0 $accept: root .  [$end]
 
+    $end  accept
 
-state 2
-	root:  selectors.    (2)
+state 2 // ALWAYS [$end]
 
-	.  reduce 2 (src line 34)
+    2 root: selectors .  [$end]
 
+    $end  reduce using rule 2 (root)
 
-state 3
-	selectors:  selector.selector_seq 
-	selector_seq: .    (4)
+state 3 // ALWAYS [$end]
 
-	';'  shift 30
-	.  reduce 4 (src line 47)
+    3 selectors: selector . selector_seq
+    4 selector_seq: .  [$end]
 
-	selector_seq  goto 29
+    $end  reduce using rule 4 (selector_seq)
+    ';'   shift, and goto state 60
 
-state 4
-	selector:  ALWAYS.    (6)
+    selector_seq  goto state 59
 
-	.  reduce 6 (src line 54)
+state 4 // ALWAYS
 
+    6 selector: ALWAYS .  [$end, ';']
 
-state 5
-	selector:  days.    (7)
-	selector:  days.SEP MONTH 
-	selector:  days.SEP MONTH SEP small_range_selector 
-	selector:  days.SEP small_range_selector 
+    $end  reduce using rule 6 (selector)
+    ';'   reduce using rule 6 (selector)
 
-	SEP  shift 31
-	.  reduce 7 (src line 58)
+state 5 // '0' '0' [$end]
 
+    7 selector: days .  [$end, ';']
+    8 selector: days . SEP MONTH
+    9 selector: days . SEP MONTH SEP small_range_selector
+   10 selector: days . SEP small_range_selector
 
-state 6
-	selector:  MONTH.SEP small_range_selector 
+    $end  reduce using rule 7 (selector)
+    ';'   reduce using rule 7 (selector)
+    SEP   shift, and goto state 54
 
-	SEP  shift 32
-	.  error
+state 6 // MONTH
 
+   11 selector: MONTH . SEP small_range_selector
 
-state 7
-	selector:  small_range_selector.    (12)
+    SEP  shift, and goto state 52
 
-	.  reduce 12 (src line 83)
+state 7 // WEEKDAY [$end]
 
+   12 selector: small_range_selector .  [$end, ';']
 
-state 8
-	days:  ds.more_days 
-	more_days: .    (16)
+    $end  reduce using rule 12 (selector)
+    ';'   reduce using rule 12 (selector)
 
-	','  shift 34
-	.  reduce 16 (src line 112)
+state 8 // '0' '0' [$end]
 
-	more_days  goto 33
+   13 days: ds . more_days
+   16 more_days: .  [$end, ';', SEP]
 
-state 9
-	small_range_selector:  weekdays.    (18)
-	small_range_selector:  weekdays.SEP timespans 
+    $end  reduce using rule 16 (more_days)
+    ','   shift, and goto state 50
+    ';'   reduce using rule 16 (more_days)
+    SEP   reduce using rule 16 (more_days)
 
-	SEP  shift 35
-	.  reduce 18 (src line 119)
+    more_days  goto state 49
 
+state 9 // '0' '0' [$end]
 
-state 10
-	small_range_selector:  timespans.    (20)
+   14 ds: day .  [$end, ',', ';', SEP]
+   15 ds: day . '-' day  // assoc %left, prec 1
 
-	.  reduce 20 (src line 124)
+    $end  reduce using rule 14 (ds)
+    ','   reduce using rule 14 (ds)
+    '-'   shift, and goto state 46
+    ';'   reduce using rule 14 (ds)
+    SEP   reduce using rule 14 (ds)
 
+state 10 // WEEKDAY [$end]
 
-state 11
-	ds:  day.    (14)
-	ds:  day.'-' day 
+   18 small_range_selector: weekdays .  [$end, ';']
+   19 small_range_selector: weekdays . SEP timespans
 
-	'-'  shift 36
-	.  reduce 14 (src line 97)
+    $end  reduce using rule 18 (small_range_selector)
+    ';'   reduce using rule 18 (small_range_selector)
+    SEP   shift, and goto state 44
 
+state 11 // '0' '0' ':' '0' '0' '-' '0' '0' ':' '0' '0' [$end]
 
-state 12
-	weekdays:  ws.weekdays_seq 
-	weekdays_seq: .    (24)
+   20 small_range_selector: timespans .  [$end, ';']
 
-	','  shift 38
-	.  reduce 24 (src line 151)
+    $end  reduce using rule 20 (small_range_selector)
+    ';'   reduce using rule 20 (small_range_selector)
 
-	weekdays_seq  goto 37
+state 12 // WEEKDAY [$end]
 
-state 13
-	timespans:  timespan.timespans_seq 
-	timespans_seq: .    (29)
+   21 weekdays: ws . weekdays_seq
+   24 weekdays_seq: .  [$end, ';', SEP]
 
-	','  shift 40
-	.  reduce 29 (src line 167)
+    $end  reduce using rule 24 (weekdays_seq)
+    ','   shift, and goto state 42
+    ';'   reduce using rule 24 (weekdays_seq)
+    SEP   reduce using rule 24 (weekdays_seq)
 
-	timespans_seq  goto 39
+    weekdays_seq  goto state 41
 
-state 14
-	hour:  NUM.    (33)
-	day:  NUM.    (35)
+state 13 // WEEKDAY
 
-	':'  reduce 33 (src line 193)
-	.  reduce 35 (src line 211)
+   22 ws: WEEKDAY .  [$end, ',', ';', SEP]
+   23 ws: WEEKDAY . '-' WEEKDAY
 
+    $end  reduce using rule 22 (ws)
+    ','   reduce using rule 22 (ws)
+    '-'   shift, and goto state 39
+    ';'   reduce using rule 22 (ws)
+    SEP   reduce using rule 22 (ws)
 
-state 15
-	ws:  WEEKDAY.    (22)
-	ws:  WEEKDAY.'-' WEEKDAY 
+state 14 // '0' '0' ':' '0' '0' '-' '0' '0' ':' '0' '0' [$end]
 
-	'-'  shift 41
-	.  reduce 22 (src line 134)
+   28 timespans: timespan . timespans_seq
+   29 timespans_seq: .  [$end, ';']
 
+    $end  reduce using rule 29 (timespans_seq)
+    ','   shift, and goto state 37
+    ';'   reduce using rule 29 (timespans_seq)
 
-state 16
-	timespan:  time.'-' time 
+    timespans_seq  goto state 36
 
-	'-'  shift 42
-	.  error
+state 15 // '0' '0' ':' '0' '0' ['-']
 
+   31 timespan: time . '-' time  // assoc %left, prec 1
 
-state 17
-	NUM:  DIGIT.DIGIT 
+    '-'  shift, and goto state 33
 
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
+state 16 // '0' '0' [':']
 
-	DIGIT  goto 43
+   32 time: hour . ':' minute  // assoc %left, prec 1
 
-state 18
-	time:  hour.':' minute 
+    ':'  shift, and goto state 30
 
-	':'  shift 44
-	.  error
+state 17 // '0' '0' [$end]
 
+   33 hour: NUM .  [':']
+   35 day: NUM .  [$end, ',', '-', ';', SEP]
 
-state 19
-	DIGIT:  '0'.    (37)
+    $end  reduce using rule 35 (day)
+    ','   reduce using rule 35 (day)
+    '-'   reduce using rule 35 (day)
+    ':'   reduce using rule 33 (hour)
+    ';'   reduce using rule 35 (day)
+    SEP   reduce using rule 35 (day)
+
+state 18 // '0' ['0']
+
+   36 NUM: DIGIT . DIGIT
+
+    '0'  shift, and goto state 19
+    '1'  shift, and goto state 20
+    '2'  shift, and goto state 21
+    '3'  shift, and goto state 22
+    '4'  shift, and goto state 23
+    '5'  shift, and goto state 24
+    '6'  shift, and goto state 25
+    '7'  shift, and goto state 26
+    '8'  shift, and goto state 27
+    '9'  shift, and goto state 28
+
+    DIGIT  goto state 29
+
+state 19 // '0'
+
+   37 DIGIT: '0' .  [$end, ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', SEP]
+
+    $end  reduce using rule 37 (DIGIT)
+    ','   reduce using rule 37 (DIGIT)
+    '-'   reduce using rule 37 (DIGIT)
+    '0'   reduce using rule 37 (DIGIT)
+    '1'   reduce using rule 37 (DIGIT)
+    '2'   reduce using rule 37 (DIGIT)
+    '3'   reduce using rule 37 (DIGIT)
+    '4'   reduce using rule 37 (DIGIT)
+    '5'   reduce using rule 37 (DIGIT)
+    '6'   reduce using rule 37 (DIGIT)
+    '7'   reduce using rule 37 (DIGIT)
+    '8'   reduce using rule 37 (DIGIT)
+    '9'   reduce using rule 37 (DIGIT)
+    ':'   reduce using rule 37 (DIGIT)
+    ';'   reduce using rule 37 (DIGIT)
+    SEP   reduce using rule 37 (DIGIT)
+
+state 20 // '1'
+
+   38 DIGIT: '1' .  [$end, ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', SEP]
+
+    $end  reduce using rule 38 (DIGIT)
+    ','   reduce using rule 38 (DIGIT)
+    '-'   reduce using rule 38 (DIGIT)
+    '0'   reduce using rule 38 (DIGIT)
+    '1'   reduce using rule 38 (DIGIT)
+    '2'   reduce using rule 38 (DIGIT)
+    '3'   reduce using rule 38 (DIGIT)
+    '4'   reduce using rule 38 (DIGIT)
+    '5'   reduce using rule 38 (DIGIT)
+    '6'   reduce using rule 38 (DIGIT)
+    '7'   reduce using rule 38 (DIGIT)
+    '8'   reduce using rule 38 (DIGIT)
+    '9'   reduce using rule 38 (DIGIT)
+    ':'   reduce using rule 38 (DIGIT)
+    ';'   reduce using rule 38 (DIGIT)
+    SEP   reduce using rule 38 (DIGIT)
+
+state 21 // '2'
+
+   39 DIGIT: '2' .  [$end, ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', SEP]
+
+    $end  reduce using rule 39 (DIGIT)
+    ','   reduce using rule 39 (DIGIT)
+    '-'   reduce using rule 39 (DIGIT)
+    '0'   reduce using rule 39 (DIGIT)
+    '1'   reduce using rule 39 (DIGIT)
+    '2'   reduce using rule 39 (DIGIT)
+    '3'   reduce using rule 39 (DIGIT)
+    '4'   reduce using rule 39 (DIGIT)
+    '5'   reduce using rule 39 (DIGIT)
+    '6'   reduce using rule 39 (DIGIT)
+    '7'   reduce using rule 39 (DIGIT)
+    '8'   reduce using rule 39 (DIGIT)
+    '9'   reduce using rule 39 (DIGIT)
+    ':'   reduce using rule 39 (DIGIT)
+    ';'   reduce using rule 39 (DIGIT)
+    SEP   reduce using rule 39 (DIGIT)
+
+state 22 // '3'
+
+   40 DIGIT: '3' .  [$end, ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', SEP]
+
+    $end  reduce using rule 40 (DIGIT)
+    ','   reduce using rule 40 (DIGIT)
+    '-'   reduce using rule 40 (DIGIT)
+    '0'   reduce using rule 40 (DIGIT)
+    '1'   reduce using rule 40 (DIGIT)
+    '2'   reduce using rule 40 (DIGIT)
+    '3'   reduce using rule 40 (DIGIT)
+    '4'   reduce using rule 40 (DIGIT)
+    '5'   reduce using rule 40 (DIGIT)
+    '6'   reduce using rule 40 (DIGIT)
+    '7'   reduce using rule 40 (DIGIT)
+    '8'   reduce using rule 40 (DIGIT)
+    '9'   reduce using rule 40 (DIGIT)
+    ':'   reduce using rule 40 (DIGIT)
+    ';'   reduce using rule 40 (DIGIT)
+    SEP   reduce using rule 40 (DIGIT)
+
+state 23 // '4'
+
+   41 DIGIT: '4' .  [$end, ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', SEP]
+
+    $end  reduce using rule 41 (DIGIT)
+    ','   reduce using rule 41 (DIGIT)
+    '-'   reduce using rule 41 (DIGIT)
+    '0'   reduce using rule 41 (DIGIT)
+    '1'   reduce using rule 41 (DIGIT)
+    '2'   reduce using rule 41 (DIGIT)
+    '3'   reduce using rule 41 (DIGIT)
+    '4'   reduce using rule 41 (DIGIT)
+    '5'   reduce using rule 41 (DIGIT)
+    '6'   reduce using rule 41 (DIGIT)
+    '7'   reduce using rule 41 (DIGIT)
+    '8'   reduce using rule 41 (DIGIT)
+    '9'   reduce using rule 41 (DIGIT)
+    ':'   reduce using rule 41 (DIGIT)
+    ';'   reduce using rule 41 (DIGIT)
+    SEP   reduce using rule 41 (DIGIT)
+
+state 24 // '5'
+
+   42 DIGIT: '5' .  [$end, ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', SEP]
+
+    $end  reduce using rule 42 (DIGIT)
+    ','   reduce using rule 42 (DIGIT)
+    '-'   reduce using rule 42 (DIGIT)
+    '0'   reduce using rule 42 (DIGIT)
+    '1'   reduce using rule 42 (DIGIT)
+    '2'   reduce using rule 42 (DIGIT)
+    '3'   reduce using rule 42 (DIGIT)
+    '4'   reduce using rule 42 (DIGIT)
+    '5'   reduce using rule 42 (DIGIT)
+    '6'   reduce using rule 42 (DIGIT)
+    '7'   reduce using rule 42 (DIGIT)
+    '8'   reduce using rule 42 (DIGIT)
+    '9'   reduce using rule 42 (DIGIT)
+    ':'   reduce using rule 42 (DIGIT)
+    ';'   reduce using rule 42 (DIGIT)
+    SEP   reduce using rule 42 (DIGIT)
+
+state 25 // '6'
+
+   43 DIGIT: '6' .  [$end, ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', SEP]
+
+    $end  reduce using rule 43 (DIGIT)
+    ','   reduce using rule 43 (DIGIT)
+    '-'   reduce using rule 43 (DIGIT)
+    '0'   reduce using rule 43 (DIGIT)
+    '1'   reduce using rule 43 (DIGIT)
+    '2'   reduce using rule 43 (DIGIT)
+    '3'   reduce using rule 43 (DIGIT)
+    '4'   reduce using rule 43 (DIGIT)
+    '5'   reduce using rule 43 (DIGIT)
+    '6'   reduce using rule 43 (DIGIT)
+    '7'   reduce using rule 43 (DIGIT)
+    '8'   reduce using rule 43 (DIGIT)
+    '9'   reduce using rule 43 (DIGIT)
+    ':'   reduce using rule 43 (DIGIT)
+    ';'   reduce using rule 43 (DIGIT)
+    SEP   reduce using rule 43 (DIGIT)
+
+state 26 // '7'
+
+   44 DIGIT: '7' .  [$end, ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', SEP]
+
+    $end  reduce using rule 44 (DIGIT)
+    ','   reduce using rule 44 (DIGIT)
+    '-'   reduce using rule 44 (DIGIT)
+    '0'   reduce using rule 44 (DIGIT)
+    '1'   reduce using rule 44 (DIGIT)
+    '2'   reduce using rule 44 (DIGIT)
+    '3'   reduce using rule 44 (DIGIT)
+    '4'   reduce using rule 44 (DIGIT)
+    '5'   reduce using rule 44 (DIGIT)
+    '6'   reduce using rule 44 (DIGIT)
+    '7'   reduce using rule 44 (DIGIT)
+    '8'   reduce using rule 44 (DIGIT)
+    '9'   reduce using rule 44 (DIGIT)
+    ':'   reduce using rule 44 (DIGIT)
+    ';'   reduce using rule 44 (DIGIT)
+    SEP   reduce using rule 44 (DIGIT)
+
+state 27 // '8'
+
+   45 DIGIT: '8' .  [$end, ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', SEP]
+
+    $end  reduce using rule 45 (DIGIT)
+    ','   reduce using rule 45 (DIGIT)
+    '-'   reduce using rule 45 (DIGIT)
+    '0'   reduce using rule 45 (DIGIT)
+    '1'   reduce using rule 45 (DIGIT)
+    '2'   reduce using rule 45 (DIGIT)
+    '3'   reduce using rule 45 (DIGIT)
+    '4'   reduce using rule 45 (DIGIT)
+    '5'   reduce using rule 45 (DIGIT)
+    '6'   reduce using rule 45 (DIGIT)
+    '7'   reduce using rule 45 (DIGIT)
+    '8'   reduce using rule 45 (DIGIT)
+    '9'   reduce using rule 45 (DIGIT)
+    ':'   reduce using rule 45 (DIGIT)
+    ';'   reduce using rule 45 (DIGIT)
+    SEP   reduce using rule 45 (DIGIT)
+
+state 28 // '9'
+
+   46 DIGIT: '9' .  [$end, ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', SEP]
+
+    $end  reduce using rule 46 (DIGIT)
+    ','   reduce using rule 46 (DIGIT)
+    '-'   reduce using rule 46 (DIGIT)
+    '0'   reduce using rule 46 (DIGIT)
+    '1'   reduce using rule 46 (DIGIT)
+    '2'   reduce using rule 46 (DIGIT)
+    '3'   reduce using rule 46 (DIGIT)
+    '4'   reduce using rule 46 (DIGIT)
+    '5'   reduce using rule 46 (DIGIT)
+    '6'   reduce using rule 46 (DIGIT)
+    '7'   reduce using rule 46 (DIGIT)
+    '8'   reduce using rule 46 (DIGIT)
+    '9'   reduce using rule 46 (DIGIT)
+    ':'   reduce using rule 46 (DIGIT)
+    ';'   reduce using rule 46 (DIGIT)
+    SEP   reduce using rule 46 (DIGIT)
+
+state 29 // '0' '0' [$end]
+
+   36 NUM: DIGIT DIGIT .  [$end, ',', '-', ':', ';', SEP]
+
+    $end  reduce using rule 36 (NUM)
+    ','   reduce using rule 36 (NUM)
+    '-'   reduce using rule 36 (NUM)
+    ':'   reduce using rule 36 (NUM)
+    ';'   reduce using rule 36 (NUM)
+    SEP   reduce using rule 36 (NUM)
+
+state 30 // '0' '0' ':'
+
+   32 time: hour ':' . minute  // assoc %left, prec 1
+
+    '0'  shift, and goto state 19
+    '1'  shift, and goto state 20
+    '2'  shift, and goto state 21
+    '3'  shift, and goto state 22
+    '4'  shift, and goto state 23
+    '5'  shift, and goto state 24
+    '6'  shift, and goto state 25
+    '7'  shift, and goto state 26
+    '8'  shift, and goto state 27
+    '9'  shift, and goto state 28
+
+    DIGIT   goto state 18
+    NUM     goto state 32
+    minute  goto state 31
+
+state 31 // '0' '0' ':' '0' '0' [$end]
+
+   32 time: hour ':' minute .  [$end, ',', '-', ';']  // assoc %left, prec 1
+
+    $end  reduce using rule 32 (time)
+    ','   reduce using rule 32 (time)
+    '-'   reduce using rule 32 (time)
+    ';'   reduce using rule 32 (time)
+
+state 32 // '0' '0' ':' '0' '0' [$end]
+
+   34 minute: NUM .  [$end, ',', '-', ';']
+
+    $end  reduce using rule 34 (minute)
+    ','   reduce using rule 34 (minute)
+    '-'   reduce using rule 34 (minute)
+    ';'   reduce using rule 34 (minute)
+
+state 33 // '0' '0' ':' '0' '0' '-'
+
+   31 timespan: time '-' . time  // assoc %left, prec 1
+
+    '0'  shift, and goto state 19
+    '1'  shift, and goto state 20
+    '2'  shift, and goto state 21
+    '3'  shift, and goto state 22
+    '4'  shift, and goto state 23
+    '5'  shift, and goto state 24
+    '6'  shift, and goto state 25
+    '7'  shift, and goto state 26
+    '8'  shift, and goto state 27
+    '9'  shift, and goto state 28
+
+    DIGIT  goto state 18
+    NUM    goto state 35
+    hour   goto state 16
+    time   goto state 34
+
+state 34 // '0' '0' ':' '0' '0' '-' '0' '0' ':' '0' '0' [$end]
+
+   31 timespan: time '-' time .  [$end, ',', ';']  // assoc %left, prec 1
+
+    $end  reduce using rule 31 (timespan)
+    ','   reduce using rule 31 (timespan)
+    ';'   reduce using rule 31 (timespan)
+
+state 35 // MONTH SEP '0' '0' [':']
+
+   33 hour: NUM .  [':']
+
+    ':'  reduce using rule 33 (hour)
+
+state 36 // '0' '0' ':' '0' '0' '-' '0' '0' ':' '0' '0' [$end]
+
+   28 timespans: timespan timespans_seq .  [$end, ';']
+
+    $end  reduce using rule 28 (timespans)
+    ';'   reduce using rule 28 (timespans)
+
+state 37 // '0' '0' ':' '0' '0' '-' '0' '0' ':' '0' '0' ','
+
+   30 timespans_seq: ',' . timespans
+
+    '0'  shift, and goto state 19
+    '1'  shift, and goto state 20
+    '2'  shift, and goto state 21
+    '3'  shift, and goto state 22
+    '4'  shift, and goto state 23
+    '5'  shift, and goto state 24
+    '6'  shift, and goto state 25
+    '7'  shift, and goto state 26
+    '8'  shift, and goto state 27
+    '9'  shift, and goto state 28
+
+    DIGIT      goto state 18
+    NUM        goto state 35
+    hour       goto state 16
+    time       goto state 15
+    timespan   goto state 14
+    timespans  goto state 38
+
+state 38 // '0' '0' ':' '0' '0' '-' '0' '0' ':' '0' '0' ',' '0' '0' ':' '0' '0' '-' '0' '0' ':' '0' '0' [$end]
+
+   30 timespans_seq: ',' timespans .  [$end, ';']
+
+    $end  reduce using rule 30 (timespans_seq)
+    ';'   reduce using rule 30 (timespans_seq)
+
+state 39 // WEEKDAY '-'
+
+   23 ws: WEEKDAY '-' . WEEKDAY
+
+    WEEKDAY  shift, and goto state 40
+
+state 40 // WEEKDAY '-' WEEKDAY
+
+   23 ws: WEEKDAY '-' WEEKDAY .  [$end, ',', ';', SEP]
+
+    $end  reduce using rule 23 (ws)
+    ','   reduce using rule 23 (ws)
+    ';'   reduce using rule 23 (ws)
+    SEP   reduce using rule 23 (ws)
+
+state 41 // WEEKDAY [$end]
+
+   21 weekdays: ws weekdays_seq .  [$end, ';', SEP]
+
+    $end  reduce using rule 21 (weekdays)
+    ';'   reduce using rule 21 (weekdays)
+    SEP   reduce using rule 21 (weekdays)
+
+state 42 // WEEKDAY ','
+
+   25 weekdays_seq: ',' . weekdays
+
+    WEEKDAY  shift, and goto state 13
+
+    weekdays  goto state 43
+    ws        goto state 12
+
+state 43 // WEEKDAY ',' WEEKDAY [$end]
+
+   25 weekdays_seq: ',' weekdays .  [$end, ';', SEP]
+
+    $end  reduce using rule 25 (weekdays_seq)
+    ';'   reduce using rule 25 (weekdays_seq)
+    SEP   reduce using rule 25 (weekdays_seq)
+
+state 44 // WEEKDAY SEP
+
+   19 small_range_selector: weekdays SEP . timespans
+
+    '0'  shift, and goto state 19
+    '1'  shift, and goto state 20
+    '2'  shift, and goto state 21
+    '3'  shift, and goto state 22
+    '4'  shift, and goto state 23
+    '5'  shift, and goto state 24
+    '6'  shift, and goto state 25
+    '7'  shift, and goto state 26
+    '8'  shift, and goto state 27
+    '9'  shift, and goto state 28
+
+    DIGIT      goto state 18
+    NUM        goto state 35
+    hour       goto state 16
+    time       goto state 15
+    timespan   goto state 14
+    timespans  goto state 45
+
+state 45 // WEEKDAY SEP '0' '0' ':' '0' '0' '-' '0' '0' ':' '0' '0' [$end]
+
+   19 small_range_selector: weekdays SEP timespans .  [$end, ';']
+
+    $end  reduce using rule 19 (small_range_selector)
+    ';'   reduce using rule 19 (small_range_selector)
+
+state 46 // '0' '0' '-'
+
+   15 ds: day '-' . day  // assoc %left, prec 1
+
+    '0'  shift, and goto state 19
+    '1'  shift, and goto state 20
+    '2'  shift, and goto state 21
+    '3'  shift, and goto state 22
+    '4'  shift, and goto state 23
+    '5'  shift, and goto state 24
+    '6'  shift, and goto state 25
+    '7'  shift, and goto state 26
+    '8'  shift, and goto state 27
+    '9'  shift, and goto state 28
+
+    DIGIT  goto state 18
+    NUM    goto state 48
+    day    goto state 47
+
+state 47 // '0' '0' '-' '0' '0' [$end]
+
+   15 ds: day '-' day .  [$end, ',', ';', SEP]  // assoc %left, prec 1
+
+    $end  reduce using rule 15 (ds)
+    ','   reduce using rule 15 (ds)
+    ';'   reduce using rule 15 (ds)
+    SEP   reduce using rule 15 (ds)
+
+state 48 // '0' '0' '-' '0' '0' [$end]
+
+   35 day: NUM .  [$end, ',', '-', ';', SEP]
+
+    $end  reduce using rule 35 (day)
+    ','   reduce using rule 35 (day)
+    '-'   reduce using rule 35 (day)
+    ';'   reduce using rule 35 (day)
+    SEP   reduce using rule 35 (day)
+
+state 49 // '0' '0' [$end]
+
+   13 days: ds more_days .  [$end, ';', SEP]
+
+    $end  reduce using rule 13 (days)
+    ';'   reduce using rule 13 (days)
+    SEP   reduce using rule 13 (days)
+
+state 50 // '0' '0' ','
+
+   17 more_days: ',' . days
+
+    '0'  shift, and goto state 19
+    '1'  shift, and goto state 20
+    '2'  shift, and goto state 21
+    '3'  shift, and goto state 22
+    '4'  shift, and goto state 23
+    '5'  shift, and goto state 24
+    '6'  shift, and goto state 25
+    '7'  shift, and goto state 26
+    '8'  shift, and goto state 27
+    '9'  shift, and goto state 28
+
+    DIGIT  goto state 18
+    NUM    goto state 48
+    day    goto state 9
+    days   goto state 51
+    ds     goto state 8
+
+state 51 // '0' '0' ',' '0' '0' [$end]
+
+   17 more_days: ',' days .  [$end, ';', SEP]
+
+    $end  reduce using rule 17 (more_days)
+    ';'   reduce using rule 17 (more_days)
+    SEP   reduce using rule 17 (more_days)
+
+state 52 // MONTH SEP
+
+   11 selector: MONTH SEP . small_range_selector
+
+    '0'      shift, and goto state 19
+    '1'      shift, and goto state 20
+    '2'      shift, and goto state 21
+    '3'      shift, and goto state 22
+    '4'      shift, and goto state 23
+    '5'      shift, and goto state 24
+    '6'      shift, and goto state 25
+    '7'      shift, and goto state 26
+    '8'      shift, and goto state 27
+    '9'      shift, and goto state 28
+    WEEKDAY  shift, and goto state 13
+
+    DIGIT                 goto state 18
+    NUM                   goto state 35
+    hour                  goto state 16
+    small_range_selector  goto state 53
+    time                  goto state 15
+    timespan              goto state 14
+    timespans             goto state 11
+    weekdays              goto state 10
+    ws                    goto state 12
+
+state 53 // MONTH SEP WEEKDAY [$end]
+
+   11 selector: MONTH SEP small_range_selector .  [$end, ';']
+
+    $end  reduce using rule 11 (selector)
+    ';'   reduce using rule 11 (selector)
+
+state 54 // '0' '0' SEP
+
+    8 selector: days SEP . MONTH
+    9 selector: days SEP . MONTH SEP small_range_selector
+   10 selector: days SEP . small_range_selector
+
+    '0'      shift, and goto state 19
+    '1'      shift, and goto state 20
+    '2'      shift, and goto state 21
+    '3'      shift, and goto state 22
+    '4'      shift, and goto state 23
+    '5'      shift, and goto state 24
+    '6'      shift, and goto state 25
+    '7'      shift, and goto state 26
+    '8'      shift, and goto state 27
+    '9'      shift, and goto state 28
+    MONTH    shift, and goto state 55
+    WEEKDAY  shift, and goto state 13
+
+    DIGIT                 goto state 18
+    NUM                   goto state 35
+    hour                  goto state 16
+    small_range_selector  goto state 56
+    time                  goto state 15
+    timespan              goto state 14
+    timespans             goto state 11
+    weekdays              goto state 10
+    ws                    goto state 12
+
+state 55 // '0' '0' SEP MONTH
+
+    8 selector: days SEP MONTH .  [$end, ';']
+    9 selector: days SEP MONTH . SEP small_range_selector
+
+    $end  reduce using rule 8 (selector)
+    ';'   reduce using rule 8 (selector)
+    SEP   shift, and goto state 57
+
+state 56 // '0' '0' SEP WEEKDAY [$end]
+
+   10 selector: days SEP small_range_selector .  [$end, ';']
+
+    $end  reduce using rule 10 (selector)
+    ';'   reduce using rule 10 (selector)
+
+state 57 // '0' '0' SEP MONTH SEP
+
+    9 selector: days SEP MONTH SEP . small_range_selector
+
+    '0'      shift, and goto state 19
+    '1'      shift, and goto state 20
+    '2'      shift, and goto state 21
+    '3'      shift, and goto state 22
+    '4'      shift, and goto state 23
+    '5'      shift, and goto state 24
+    '6'      shift, and goto state 25
+    '7'      shift, and goto state 26
+    '8'      shift, and goto state 27
+    '9'      shift, and goto state 28
+    WEEKDAY  shift, and goto state 13
+
+    DIGIT                 goto state 18
+    NUM                   goto state 35
+    hour                  goto state 16
+    small_range_selector  goto state 58
+    time                  goto state 15
+    timespan              goto state 14
+    timespans             goto state 11
+    weekdays              goto state 10
+    ws                    goto state 12
+
+state 58 // '0' '0' SEP MONTH SEP WEEKDAY [$end]
+
+    9 selector: days SEP MONTH SEP small_range_selector .  [$end, ';']
+
+    $end  reduce using rule 9 (selector)
+    ';'   reduce using rule 9 (selector)
+
+state 59 // ALWAYS [$end]
+
+    3 selectors: selector selector_seq .  [$end]
+
+    $end  reduce using rule 3 (selectors)
+
+state 60 // ALWAYS ';'
+
+    5 selector_seq: ';' . opt_sep selectors
+   26 opt_sep: .  ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ALWAYS, MONTH, SEP, WEEKDAY]
+
+    '0'      reduce using rule 26 (opt_sep)
+    '1'      reduce using rule 26 (opt_sep)
+    '2'      reduce using rule 26 (opt_sep)
+    '3'      reduce using rule 26 (opt_sep)
+    '4'      reduce using rule 26 (opt_sep)
+    '5'      reduce using rule 26 (opt_sep)
+    '6'      reduce using rule 26 (opt_sep)
+    '7'      reduce using rule 26 (opt_sep)
+    '8'      reduce using rule 26 (opt_sep)
+    '9'      reduce using rule 26 (opt_sep)
+    ALWAYS   reduce using rule 26 (opt_sep)
+    MONTH    reduce using rule 26 (opt_sep)
+    SEP      reduce using rule 26 (opt_sep)
+    WEEKDAY  reduce using rule 26 (opt_sep)
+
+    opt_sep  goto state 61
+
+state 61 // ALWAYS ';' ['0']
+
+    5 selector_seq: ';' opt_sep . selectors
+   27 opt_sep: opt_sep . SEP
+
+    '0'      shift, and goto state 19
+    '1'      shift, and goto state 20
+    '2'      shift, and goto state 21
+    '3'      shift, and goto state 22
+    '4'      shift, and goto state 23
+    '5'      shift, and goto state 24
+    '6'      shift, and goto state 25
+    '7'      shift, and goto state 26
+    '8'      shift, and goto state 27
+    '9'      shift, and goto state 28
+    ALWAYS   shift, and goto state 4
+    MONTH    shift, and goto state 6
+    SEP      shift, and goto state 63
+    WEEKDAY  shift, and goto state 13
+
+    DIGIT                 goto state 18
+    NUM                   goto state 17
+    day                   goto state 9
+    days                  goto state 5
+    ds                    goto state 8
+    hour                  goto state 16
+    selector              goto state 3
+    selectors             goto state 62
+    small_range_selector  goto state 7
+    time                  goto state 15
+    timespan              goto state 14
+    timespans             goto state 11
+    weekdays              goto state 10
+    ws                    goto state 12
+
+state 62 // ALWAYS ';' ALWAYS [$end]
+
+    5 selector_seq: ';' opt_sep selectors .  [$end]
+
+    $end  reduce using rule 5 (selector_seq)
+
+state 63 // ALWAYS ';' SEP
+
+   27 opt_sep: opt_sep SEP .  ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ALWAYS, MONTH, SEP, WEEKDAY]
+
+    '0'      reduce using rule 27 (opt_sep)
+    '1'      reduce using rule 27 (opt_sep)
+    '2'      reduce using rule 27 (opt_sep)
+    '3'      reduce using rule 27 (opt_sep)
+    '4'      reduce using rule 27 (opt_sep)
+    '5'      reduce using rule 27 (opt_sep)
+    '6'      reduce using rule 27 (opt_sep)
+    '7'      reduce using rule 27 (opt_sep)
+    '8'      reduce using rule 27 (opt_sep)
+    '9'      reduce using rule 27 (opt_sep)
+    ALWAYS   reduce using rule 27 (opt_sep)
+    MONTH    reduce using rule 27 (opt_sep)
+    SEP      reduce using rule 27 (opt_sep)
+    WEEKDAY  reduce using rule 27 (opt_sep)
 
-	.  reduce 37 (src line 222)
-
-
-state 20
-	DIGIT:  '1'.    (38)
-
-	.  reduce 38 (src line 222)
-
-
-state 21
-	DIGIT:  '2'.    (39)
-
-	.  reduce 39 (src line 222)
-
-
-state 22
-	DIGIT:  '3'.    (40)
-
-	.  reduce 40 (src line 222)
-
-
-state 23
-	DIGIT:  '4'.    (41)
-
-	.  reduce 41 (src line 222)
-
-
-state 24
-	DIGIT:  '5'.    (42)
-
-	.  reduce 42 (src line 222)
-
-
-state 25
-	DIGIT:  '6'.    (43)
-
-	.  reduce 43 (src line 222)
-
-
-state 26
-	DIGIT:  '7'.    (44)
-
-	.  reduce 44 (src line 222)
-
-
-state 27
-	DIGIT:  '8'.    (45)
-
-	.  reduce 45 (src line 222)
-
-
-state 28
-	DIGIT:  '9'.    (46)
-
-	.  reduce 46 (src line 222)
-
-
-state 29
-	selectors:  selector selector_seq.    (3)
-
-	.  reduce 3 (src line 44)
-
-
-state 30
-	selector_seq:  ';'.opt_sep selectors 
-	opt_sep: .    (26)
-
-	.  reduce 26 (src line 162)
-
-	opt_sep  goto 45
-
-state 31
-	selector:  days SEP.MONTH 
-	selector:  days SEP.MONTH SEP small_range_selector 
-	selector:  days SEP.small_range_selector 
-
-	WEEKDAY  shift 15
-	MONTH  shift 46
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
-
-	time  goto 16
-	hour  goto 18
-	DIGIT  goto 17
-	NUM  goto 48
-	ws  goto 12
-	weekdays  goto 9
-	timespan  goto 13
-	timespans  goto 10
-	small_range_selector  goto 47
-
-state 32
-	selector:  MONTH SEP.small_range_selector 
-
-	WEEKDAY  shift 15
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
-
-	time  goto 16
-	hour  goto 18
-	DIGIT  goto 17
-	NUM  goto 48
-	ws  goto 12
-	weekdays  goto 9
-	timespan  goto 13
-	timespans  goto 10
-	small_range_selector  goto 49
-
-state 33
-	days:  ds more_days.    (13)
-
-	.  reduce 13 (src line 91)
-
-
-state 34
-	more_days:  ','.days 
-
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
-
-	day  goto 11
-	DIGIT  goto 17
-	NUM  goto 51
-	days  goto 50
-	ds  goto 8
-
-state 35
-	small_range_selector:  weekdays SEP.timespans 
-
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
-
-	time  goto 16
-	hour  goto 18
-	DIGIT  goto 17
-	NUM  goto 48
-	timespan  goto 13
-	timespans  goto 52
-
-state 36
-	ds:  day '-'.day 
-
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
-
-	day  goto 53
-	DIGIT  goto 17
-	NUM  goto 51
-
-state 37
-	weekdays:  ws weekdays_seq.    (21)
-
-	.  reduce 21 (src line 128)
-
-
-state 38
-	weekdays_seq:  ','.weekdays 
-
-	WEEKDAY  shift 15
-	.  error
-
-	ws  goto 12
-	weekdays  goto 54
-
-state 39
-	timespans:  timespan timespans_seq.    (28)
-
-	.  reduce 28 (src line 164)
-
-
-state 40
-	timespans_seq:  ','.timespans 
-
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
-
-	time  goto 16
-	hour  goto 18
-	DIGIT  goto 17
-	NUM  goto 48
-	timespan  goto 13
-	timespans  goto 55
-
-state 41
-	ws:  WEEKDAY '-'.WEEKDAY 
-
-	WEEKDAY  shift 56
-	.  error
-
-
-state 42
-	timespan:  time '-'.time 
-
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
-
-	time  goto 57
-	hour  goto 18
-	DIGIT  goto 17
-	NUM  goto 48
-
-state 43
-	NUM:  DIGIT DIGIT.    (36)
-
-	.  reduce 36 (src line 218)
-
-
-state 44
-	time:  hour ':'.minute 
-
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
-
-	minute  goto 58
-	DIGIT  goto 17
-	NUM  goto 59
-
-state 45
-	selector_seq:  ';' opt_sep.selectors 
-	opt_sep:  opt_sep.SEP 
-
-	WEEKDAY  shift 15
-	MONTH  shift 6
-	ALWAYS  shift 4
-	SEP  shift 61
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
-
-	time  goto 16
-	hour  goto 18
-	day  goto 11
-	DIGIT  goto 17
-	NUM  goto 14
-	ws  goto 12
-	weekdays  goto 9
-	days  goto 5
-	ds  goto 8
-	timespan  goto 13
-	timespans  goto 10
-	selector  goto 3
-	selectors  goto 60
-	small_range_selector  goto 7
-
-state 46
-	selector:  days SEP MONTH.    (8)
-	selector:  days SEP MONTH.SEP small_range_selector 
-
-	SEP  shift 62
-	.  reduce 8 (src line 63)
-
-
-state 47
-	selector:  days SEP small_range_selector.    (10)
-
-	.  reduce 10 (src line 73)
-
-
-state 48
-	hour:  NUM.    (33)
-
-	.  reduce 33 (src line 193)
-
-
-state 49
-	selector:  MONTH SEP small_range_selector.    (11)
-
-	.  reduce 11 (src line 78)
-
-
-state 50
-	more_days:  ',' days.    (17)
-
-	.  reduce 17 (src line 114)
-
-
-state 51
-	day:  NUM.    (35)
-
-	.  reduce 35 (src line 211)
-
-
-state 52
-	small_range_selector:  weekdays SEP timespans.    (19)
-
-	.  reduce 19 (src line 122)
-
-
-state 53
-	ds:  day '-' day.    (15)
-
-	.  reduce 15 (src line 99)
-
-
-state 54
-	weekdays_seq:  ',' weekdays.    (25)
-
-	.  reduce 25 (src line 155)
-
-
-state 55
-	timespans_seq:  ',' timespans.    (30)
-
-	.  reduce 30 (src line 168)
-
-
-state 56
-	ws:  WEEKDAY '-' WEEKDAY.    (23)
-
-	.  reduce 23 (src line 138)
-
-
-state 57
-	timespan:  time '-' time.    (31)
-
-	.  reduce 31 (src line 172)
-
-
-state 58
-	time:  hour ':' minute.    (32)
-
-	.  reduce 32 (src line 183)
-
-
-state 59
-	minute:  NUM.    (34)
-
-	.  reduce 34 (src line 202)
-
-
-state 60
-	selector_seq:  ';' opt_sep selectors.    (5)
-
-	.  reduce 5 (src line 49)
-
-
-state 61
-	opt_sep:  opt_sep SEP.    (27)
-
-	.  reduce 27 (src line 162)
-
-
-state 62
-	selector:  days SEP MONTH SEP.small_range_selector 
-
-	WEEKDAY  shift 15
-	'0'  shift 19
-	'1'  shift 20
-	'2'  shift 21
-	'3'  shift 22
-	'4'  shift 23
-	'5'  shift 24
-	'6'  shift 25
-	'7'  shift 26
-	'8'  shift 27
-	'9'  shift 28
-	.  error
-
-	time  goto 16
-	hour  goto 18
-	DIGIT  goto 17
-	NUM  goto 48
-	ws  goto 12
-	weekdays  goto 9
-	timespan  goto 13
-	timespans  goto 10
-	small_range_selector  goto 63
-
-state 63
-	selector:  days SEP MONTH SEP small_range_selector.    (9)
-
-	.  reduce 9 (src line 68)
-
-
-21 terminals, 22 nonterminals
-47 grammar rules, 64/8000 states
-0 shift/reduce, 0 reduce/reduce conflicts reported
-71 working sets used
-memory: parser 115/120000
-4 extra closures
-145 shift entries, 2 exceptions
-37 goto entries
-54 entries saved by goto default
-Optimizer space used: output 120/120000
-120 table entries, 9 zero
-maximum spread: 21, maximum offset: 62
