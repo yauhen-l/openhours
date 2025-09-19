@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"math/rand"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -75,8 +73,8 @@ func TestMatch(t *testing.T) {
 		assert.False(oh.Match(march21))
 		assert.True(oh.Match(march21.Add(minusMinute)))
 
-		assert.True(oh.Match(march20.AddDate(rand.Intn(20), 0, 0)))
-		assert.False(oh.Match(march20.AddDate(0, rand.Intn(20), 0)))
+		assert.True(oh.Match(march20.AddDate(5, 0, 0)))
+		assert.False(oh.Match(march20.AddDate(0, 3, 0)))
 	})
 
 	t.Run("day only", func(t *testing.T) {
