@@ -42,6 +42,7 @@ func TestMatch(t *testing.T) {
 	})
 
 	t.Run("weekdays only", func(t *testing.T) {
+		weekdays := map[string]int{"Su": 0, "Mo": 1, "Tu": 2, "We": 3, "Th": 4, "Fr": 5, "Sa": 6}
 		for wd, i := range weekdays {
 			t.Run(wd, func(t *testing.T) {
 				assert := require.New(t)
