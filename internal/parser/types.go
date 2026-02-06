@@ -44,6 +44,8 @@ func (m monthly) MatchExt(t time.Time) (isOpen bool, nextChange time.Time, durat
 	// Find the applicable weekly schedule for this time
 	var applicableWeekly weekly
 	found := false
+	foundMonth := any
+	foundDay := any
 
 	for _, month := range []int{any, int(t.Month()) - 1} {
 		if d, ok := m[month]; ok {
@@ -51,6 +53,8 @@ func (m monthly) MatchExt(t time.Time) (isOpen bool, nextChange time.Time, durat
 				if w, ok := d[day]; ok {
 					applicableWeekly = w
 					found = true
+					foundMonth = month
+					foundDay = day
 					break
 				}
 			}
@@ -61,13 +65,42 @@ func (m monthly) MatchExt(t time.Time) (isOpen bool, nextChange time.Time, durat
 	}
 
 	if !found {
-		// No schedule found, return current status with no change
-		return isOpen, time.Time{}, 0
+		// No schedule found for current time
+		if !isOpen {
+			// We're closed, try to find when we next open
+			nextChange = m.findNextOpen(t)
+			if !nextChange.IsZero() {
+				duration = nextChange.Sub(t)
+			}
+		}
+		return isOpen, nextChange, duration
 	}
 
 	// Check if this is a "24/7" scenario (always open)
-	if applicableWeekly.isAlwaysOpen() {
+	// Only true if both month and day are "any" (-1) AND weekly is always open
+	if foundMonth == any && foundDay == any && applicableWeekly.isAlwaysOpen() {
 		return true, time.Time{}, 0
+	}
+
+	// For date-specific schedules with whole-day time ranges, find when the open period ends
+	if isOpen && applicableWeekly.isAlwaysOpen() {
+		// The weekly schedule covers the whole day, but we're on a specific date
+		// Check consecutive days to find when we actually close
+		nextChange = time.Date(t.Year(), t.Month(), t.Day()+1, 0, 0, 0, 0, t.Location())
+		for m.Match(nextChange) {
+			nextChange = nextChange.AddDate(0, 0, 1)
+		}
+		duration = nextChange.Sub(t)
+		return isOpen, nextChange, duration
+	}
+
+	// For closed status, try to find the next opening time by scanning ahead
+	if !isOpen {
+		nextChange = m.findNextOpen(t)
+		if !nextChange.IsZero() {
+			duration = nextChange.Sub(t)
+			return isOpen, nextChange, duration
+		}
 	}
 
 	nextChange = applicableWeekly.findNextChange(t, currentMinutes, isOpen)
@@ -76,6 +109,22 @@ func (m monthly) MatchExt(t time.Time) (isOpen bool, nextChange time.Time, durat
 	}
 
 	return isOpen, nextChange, duration
+}
+
+// findNextOpen scans ahead to find the next time the schedule opens
+func (m monthly) findNextOpen(t time.Time) time.Time {
+	// Start from midnight of the current day and scan forward
+	checkTime := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+
+	// Check up to 366 days ahead (to handle yearly schedules)
+	for i := 0; i < 366; i++ {
+		checkTime = checkTime.AddDate(0, 0, 1)
+		if m.Match(checkTime) {
+			return checkTime
+		}
+	}
+
+	return time.Time{}
 }
 
 type weekly map[int][]timeRange

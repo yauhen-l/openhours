@@ -305,15 +305,60 @@ func TestMatchExt(t *testing.T) {
 
 	t.Run("Month boundary with specific day", func(t *testing.T) {
 		assert := require.New(t)
-		oh := compileSuccess("20 Mar Mo 10:00-16:00", assert)
+		oh := compileSuccess("09 Mar Mo 10:00-16:00", assert)
 
-		// March 20, 2016 was a Sunday, so this should be closed
-		march20 := time.Date(2016, 3, 20, 12, 0, 0, 0, time.UTC)
-		isOpen, nextChange, _ := oh.MatchExt(march20)
+		march9 := time.Date(2026, 3, 9, 12, 0, 0, 0, time.UTC)
+		isOpen, nextChange, duration := oh.MatchExt(march9)
 
-		assert.False(isOpen, "Should be closed on March 20 (Sunday)")
-		// Next occurrence would be March 20, 2017 (if it's a Monday) or next available
-		assert.False(nextChange.IsZero(), "Should have a next change time")
+		assert.True(isOpen, "Should be open on March 9 (Monday)")
+		assert.Equal(time.Date(2026, time.March, 9, 16, 0, 0, 0, time.UTC), nextChange, "Should close at 16")
+		assert.Equal(4*time.Hour, duration, "Should close in 4 hours")
+
+		march9 = time.Date(2026, 3, 9, 8, 0, 0, 0, time.UTC)
+		isOpen, nextChange, duration = oh.MatchExt(march9)
+
+		assert.False(isOpen, "Should be open on March 9 (Monday) at 8")
+		assert.Equal(time.Date(2026, time.March, 9, 10, 0, 0, 0, time.UTC), nextChange, "Should open at 10")
+		assert.Equal(2*time.Hour, duration, "Should open in 2 hours")
+	})
+
+	t.Run("Day with month only", func(t *testing.T) {
+		assert := require.New(t)
+		oh := compileSuccess("25 Dec", assert)
+
+		// Test on December 25 (should be open all day)
+		dec25 := time.Date(2026, time.December, 25, 10, 0, 0, 0, time.UTC)
+		isOpen, nextChange, duration := oh.MatchExt(dec25)
+
+		assert.True(isOpen, "Should be open on December 25")
+		assert.Equal(time.Date(2026, time.December, 26, 0, 0, 0, 0, time.UTC), nextChange, "Should close at midnight")
+		assert.Equal(14*time.Hour, duration, "Should close in 14 hours")
+
+		// Test on a different day (should be closed)
+		dec24 := time.Date(2026, time.December, 24, 10, 0, 0, 0, time.UTC)
+		isOpen, _, _ = oh.MatchExt(dec24)
+		assert.False(isOpen, "Should be closed on December 24")
+	})
+
+	t.Run("Days range with month only", func(t *testing.T) {
+		assert := require.New(t)
+		oh := compileSuccess("24-25 Dec", assert)
+
+		// Test on December 25 (should be open all day)
+		dec24 := time.Date(2026, time.December, 24, 9, 0, 0, 0, time.UTC)
+		isOpen, nextChange, duration := oh.MatchExt(dec24)
+
+		assert.True(isOpen, "Should be open on December 24")
+		assert.Equal(time.Date(2026, time.December, 26, 0, 0, 0, 0, time.UTC), nextChange, "Should close at midnight Dec 26")
+		assert.Equal(39*time.Hour, duration, "Should close in 39 hours")
+
+		// Test on a different day (should be closed)
+		dec23 := time.Date(2026, time.December, 23, 9, 0, 0, 0, time.UTC)
+		isOpen, nextChange, duration = oh.MatchExt(dec23)
+		assert.False(isOpen, "Should be closed on December 23")
+		assert.Equal(time.Date(2026, time.December, 24, 0, 0, 0, 0, time.UTC), nextChange, "Should open at midnight Dec 24")
+		assert.Equal(15*time.Hour, duration, "Should open in 15 hours")
+
 	})
 
 	t.Run("Overlapping time ranges", func(t *testing.T) {
